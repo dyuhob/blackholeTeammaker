@@ -16,11 +16,8 @@ class Member {
   final String name;
   final int score;
 
-  Member copyWith({String? name, int? score}) => Member(
-    id: id,
-    name: name ?? this.name,
-    score: score ?? this.score,
-  );
+  Member copyWith({String? name, int? score}) =>
+      Member(id: id, name: name ?? this.name, score: score ?? this.score);
 
   Map<String, Object> toJson() => {'id': id, 'name': name, 'score': score};
 

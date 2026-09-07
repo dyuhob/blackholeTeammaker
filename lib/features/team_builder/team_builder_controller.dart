@@ -7,12 +7,10 @@ import '../../domain/team_result.dart';
 
 class TeamBuilderController extends ChangeNotifier {
   TeamBuilderController({
-    required TeamAllocator allocator,
-    required String Function() idFactory,
-    required DateTime Function() now,
-  }) : _allocator = allocator,
-       _idFactory = idFactory,
-       _now = now;
+    required this._allocator,
+    required this._idFactory,
+    required this._now,
+  });
 
   final TeamAllocator _allocator;
   final String Function() _idFactory;
@@ -87,7 +85,9 @@ class TeamBuilderController extends ChangeNotifier {
   }
 
   void addSavedMember(String memberId) {
-    if (_participants.any((participant) => participant.sourceMemberId == memberId)) {
+    if (_participants.any(
+      (participant) => participant.sourceMemberId == memberId,
+    )) {
       return;
     }
     final member = _savedMembers.firstWhere((value) => value.id == memberId);
@@ -165,18 +165,19 @@ class TeamBuilderController extends ChangeNotifier {
   }
 
   void _sortParticipants() {
-    final regulars = _participants
-        .where((participant) => participant.type == ParticipantType.regular)
-        .toList()
-      ..sort((left, right) {
-        final leftIndex = _savedMembers.indexWhere(
-          (member) => member.id == left.sourceMemberId,
-        );
-        final rightIndex = _savedMembers.indexWhere(
-          (member) => member.id == right.sourceMemberId,
-        );
-        return leftIndex.compareTo(rightIndex);
-      });
+    final regulars =
+        _participants
+            .where((participant) => participant.type == ParticipantType.regular)
+            .toList()
+          ..sort((left, right) {
+            final leftIndex = _savedMembers.indexWhere(
+              (member) => member.id == left.sourceMemberId,
+            );
+            final rightIndex = _savedMembers.indexWhere(
+              (member) => member.id == right.sourceMemberId,
+            );
+            return leftIndex.compareTo(rightIndex);
+          });
     final temporary = _participants
         .where((participant) => participant.type.isTemporary)
         .toList();

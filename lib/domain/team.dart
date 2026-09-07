@@ -43,7 +43,8 @@ class Team {
           _listEquals(other.participants, participants);
 
   @override
-  int get hashCode => Object.hash(number, bonusScore, Object.hashAll(participants));
+  int get hashCode =>
+      Object.hash(number, bonusScore, Object.hashAll(participants));
 }
 
 bool _listEquals<T>(List<T> left, List<T> right) {

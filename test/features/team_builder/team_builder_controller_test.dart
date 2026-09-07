@@ -45,7 +45,11 @@ void main() {
 
     controller.addSavedMember('2');
     expect(controller.availableMembers, isEmpty);
-    expect(controller.participants.map((value) => value.name), ['김회원', '이회원', '박회원']);
+    expect(controller.participants.map((value) => value.name), [
+      '김회원',
+      '이회원',
+      '박회원',
+    ]);
   });
 
   test('session score edits do not mutate the saved member', () {

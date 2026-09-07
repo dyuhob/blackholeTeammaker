@@ -4,9 +4,7 @@ import 'participant.dart';
 import 'team.dart';
 
 class TeamAllocator {
-  TeamAllocator({required Random random, required String Function() idFactory})
-    : _random = random,
-      _idFactory = idFactory;
+  TeamAllocator({required this._random, required this._idFactory});
 
   final Random _random;
   final String Function() _idFactory;
@@ -41,8 +39,12 @@ class TeamAllocator {
 
     final slots = <_Slot>[];
     for (var teamIndex = 0; teamIndex < teamCount; teamIndex++) {
-      for (var index = 0; index < teamSize - temporaryTargets[teamIndex]; index++) {
-        slots.add(_Slot(teamIndex, false));
+      for (
+        var index = 0;
+        index < teamSize - temporaryTargets[teamIndex];
+        index++
+      ) {
+        slots.add(_Slot(teamIndex));
       }
     }
     slots.shuffle(_random);
@@ -56,7 +58,7 @@ class TeamAllocator {
     final temporarySlots = <_Slot>[];
     for (var teamIndex = 0; teamIndex < teamCount; teamIndex++) {
       for (var index = 0; index < temporaryTargets[teamIndex]; index++) {
-        temporarySlots.add(_Slot(teamIndex, true));
+        temporarySlots.add(_Slot(teamIndex));
       }
     }
     temporarySlots.shuffle(_random);
@@ -64,7 +66,11 @@ class TeamAllocator {
     for (var index = 0; index < shuffledManuals.length; index++) {
       teamMembers[temporarySlots[index].teamIndex].add(shuffledManuals[index]);
     }
-    for (var index = shuffledManuals.length; index < temporarySlots.length; index++) {
+    for (
+      var index = shuffledManuals.length;
+      index < temporarySlots.length;
+      index++
+    ) {
       final autoNumber = index - shuffledManuals.length + 1;
       teamMembers[temporarySlots[index].teamIndex].add(
         Participant(
@@ -103,7 +109,9 @@ class TeamAllocator {
         final fairShare = (remainingGap / slotsLeft).ceil();
         final assigned = min(300, fairShare);
         final participantIndex = autoIndexes[position];
-        updated[participantIndex] = updated[participantIndex].copyWith(score: assigned);
+        updated[participantIndex] = updated[participantIndex].copyWith(
+          score: assigned,
+        );
         remainingGap -= assigned;
       }
 
@@ -116,8 +124,7 @@ class TeamAllocator {
 }
 
 class _Slot {
-  const _Slot(this.teamIndex, this.temporary);
+  const _Slot(this.teamIndex);
 
   final int teamIndex;
-  final bool temporary;
 }

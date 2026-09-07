@@ -12,7 +12,9 @@ class AtomicJsonFile {
 
   Future<Map<String, Object?>?> read() async {
     final directory = await directoryProvider();
-    final mainFile = File('${directory.path}${Platform.pathSeparator}$fileName');
+    final mainFile = File(
+      '${directory.path}${Platform.pathSeparator}$fileName',
+    );
     final backupFile = File('${mainFile.path}.bak');
 
     if (!await mainFile.exists()) {
@@ -40,7 +42,9 @@ class AtomicJsonFile {
       await directory.create(recursive: true);
     }
 
-    final mainFile = File('${directory.path}${Platform.pathSeparator}$fileName');
+    final mainFile = File(
+      '${directory.path}${Platform.pathSeparator}$fileName',
+    );
     final temporaryFile = File('${mainFile.path}.tmp');
     final backupFile = File('${mainFile.path}.bak');
     await temporaryFile.writeAsString(jsonEncode(value), flush: true);

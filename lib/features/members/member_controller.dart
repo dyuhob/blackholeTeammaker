@@ -4,11 +4,7 @@ import '../../data/member_repository.dart';
 import '../../domain/member.dart';
 
 class MemberController extends ChangeNotifier {
-  MemberController({
-    required MemberRepository repository,
-    required String Function() idFactory,
-  }) : _repository = repository,
-       _idFactory = idFactory;
+  MemberController({required this._repository, required this._idFactory});
 
   final MemberRepository _repository;
   final String Function() _idFactory;

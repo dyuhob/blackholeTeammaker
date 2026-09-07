@@ -12,10 +12,7 @@ void main() {
   });
 
   test('member rejects scores below zero and above 300', () {
-    expect(
-      () => Member(id: 'low', name: '낮음', score: -1),
-      throwsArgumentError,
-    );
+    expect(() => Member(id: 'low', name: '낮음', score: -1), throwsArgumentError);
     expect(
       () => Member(id: 'high', name: '높음', score: 301),
       throwsArgumentError,

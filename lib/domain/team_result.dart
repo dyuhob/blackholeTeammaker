@@ -55,13 +55,8 @@ class TeamResult {
           _listEquals(other.teams, teams);
 
   @override
-  int get hashCode => Object.hash(
-    id,
-    title,
-    createdAt,
-    teamSize,
-    Object.hashAll(teams),
-  );
+  int get hashCode =>
+      Object.hash(id, title, createdAt, teamSize, Object.hashAll(teams));
 }
 
 bool _listEquals<T>(List<T> left, List<T> right) {

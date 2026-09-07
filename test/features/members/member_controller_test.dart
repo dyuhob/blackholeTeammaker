@@ -17,7 +17,10 @@ void main() {
 
     controller.addMember('이회원', 165);
 
-    expect(controller.draftMembers.map((member) => member.name), ['김회원', '이회원']);
+    expect(controller.draftMembers.map((member) => member.name), [
+      '김회원',
+      '이회원',
+    ]);
     expect(controller.savedMembers.map((member) => member.name), ['김회원']);
     expect(controller.hasUnsavedChanges, isTrue);
   });

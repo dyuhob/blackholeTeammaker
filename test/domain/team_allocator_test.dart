@@ -64,57 +64,73 @@ void main() {
       lessThanOrEqualTo(1),
     );
     expect(
-      teams.expand((team) => team.participants).where(
-        (participant) => participant.type == ParticipantType.autoTemporary,
-      ),
+      teams
+          .expand((team) => team.participants)
+          .where(
+            (participant) => participant.type == ParticipantType.autoTemporary,
+          ),
       hasLength(1),
     );
     for (final team in teams) {
       final types = team.participants.map((participant) => participant.type);
-      expect(types, orderedEquals([...types]..sort((a, b) => a.order - b.order)));
+      expect(
+        types,
+        orderedEquals([...types]..sort((a, b) => a.order - b.order)),
+      );
     }
   });
 
-  test('score compensation reaches the highest score and shows full-team gap', () {
-    final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
-    final teams = [
-      Team(
-        number: 1,
-        participants: [regular('a', 180), regular('b', 160), manual('m', 150)],
-      ),
-      Team(
-        number: 2,
-        participants: [regular('c', 190), regular('d', 140), automatic('x')],
-      ),
-      Team(
-        number: 3,
-        participants: [regular('e', 175), regular('f', 155), regular('g', 145)],
-      ),
-    ];
+  test(
+    'score compensation reaches the highest score and shows full-team gap',
+    () {
+      final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
+      final teams = [
+        Team(
+          number: 1,
+          participants: [
+            regular('a', 180),
+            regular('b', 160),
+            manual('m', 150),
+          ],
+        ),
+        Team(
+          number: 2,
+          participants: [regular('c', 190), regular('d', 140), automatic('x')],
+        ),
+        Team(
+          number: 3,
+          participants: [
+            regular('e', 175),
+            regular('f', 155),
+            regular('g', 145),
+          ],
+        ),
+      ];
 
-    final balanced = allocator.compensateScores(teams);
+      final balanced = allocator.compensateScores(teams);
 
-    expect(balanced[0].rawScore, 490);
-    expect(balanced[0].bonusScore, 0);
-    expect(
-      balanced[1].participants.last.score,
-      160,
-      reason: 'the automatic member must close the 160 point gap',
-    );
-    expect(balanced[1].rawScore, 490);
-    expect(balanced[2].rawScore, 475);
-    expect(balanced[2].bonusScore, 15);
-  });
+      expect(balanced[0].rawScore, 490);
+      expect(balanced[0].bonusScore, 0);
+      expect(
+        balanced[1].participants.last.score,
+        160,
+        reason: 'the automatic member must close the 160 point gap',
+      );
+      expect(balanced[1].rawScore, 490);
+      expect(balanced[2].rawScore, 475);
+      expect(balanced[2].bonusScore, 15);
+    },
+  );
 
   test('451 missing points split into 226 and 225', () {
     final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
 
     final balanced = allocator.compensateScores([
-      Team(number: 1, participants: [regular('high', 300), regular('high2', 151)]),
       Team(
-        number: 2,
-        participants: [automatic('x'), automatic('y')],
+        number: 1,
+        participants: [regular('high', 300), regular('high2', 151)],
       ),
+      Team(number: 2, participants: [automatic('x'), automatic('y')]),
     ]);
 
     expect(
@@ -128,11 +144,15 @@ void main() {
     final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
 
     final balanced = allocator.compensateScores([
-      Team(number: 1, participants: [regular('high', 300), regular('high2', 300), regular('high3', 100)]),
       Team(
-        number: 2,
-        participants: [automatic('x'), automatic('y')],
+        number: 1,
+        participants: [
+          regular('high', 300),
+          regular('high2', 300),
+          regular('high3', 100),
+        ],
       ),
+      Team(number: 2, participants: [automatic('x'), automatic('y')]),
     ]);
 
     expect(
