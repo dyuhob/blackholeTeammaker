@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../data/member_repository.dart';
+import '../../domain/manual_score.dart';
 import '../../domain/member.dart';
 
 class MemberController extends ChangeNotifier {
@@ -30,7 +31,7 @@ class MemberController extends ChangeNotifier {
       _savedMembers = [...loaded];
       _draftMembers = [...loaded];
     } catch (error) {
-      _errorMessage = '회원 명단을 불러오지 못했습니다: $error';
+      _errorMessage = '클럽원 명단을 불러오지 못했습니다: $error';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -38,12 +39,14 @@ class MemberController extends ChangeNotifier {
   }
 
   void addMember(String name, int score) {
+    validateManualScore(score);
     _draftMembers.add(Member(id: _idFactory(), name: name, score: score));
     _errorMessage = null;
     notifyListeners();
   }
 
   void updateScore(String memberId, int score) {
+    validateManualScore(score);
     final index = _draftMembers.indexWhere((member) => member.id == memberId);
     if (index == -1) return;
     _draftMembers[index] = _draftMembers[index].copyWith(score: score);
@@ -65,7 +68,7 @@ class MemberController extends ChangeNotifier {
       _savedMembers = [..._draftMembers];
       return true;
     } catch (error) {
-      _errorMessage = '회원 명단을 저장하지 못했습니다: $error';
+      _errorMessage = '클럽원 명단을 저장하지 못했습니다: $error';
       return false;
     } finally {
       _isSaving = false;

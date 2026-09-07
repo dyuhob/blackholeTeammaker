@@ -36,7 +36,7 @@ void main() {
     await tester.pumpAndSettle();
     expect(find.text('김회원'), findsNothing);
 
-    await tester.tap(find.text('회원 관리'));
+    await tester.tap(find.text('클럽원 관리'));
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('save-members-button')));
     await tester.pumpAndSettle();
@@ -45,7 +45,7 @@ void main() {
     await tester.tap(find.text('팀짜기').last);
     await tester.pumpAndSettle();
     expect(find.text('김회원'), findsOneWidget);
-    expect(find.text('제외된 회원이 없습니다.'), findsOneWidget);
+    expect(find.text('제외된 클럽원이 없습니다.'), findsOneWidget);
   });
 
   testWidgets('team result enters history only after explicit save', (

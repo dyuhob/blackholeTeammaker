@@ -73,9 +73,9 @@ class _TeamCard extends StatelessWidget {
                 children: [
                   Expanded(
                     child: Text(
-                      participant.type == ParticipantType.regular
-                          ? participant.name
-                          : '${participant.name} · ${participant.type == ParticipantType.autoTemporary ? '자동' : '임시'}',
+                      participant.type == ParticipantType.manualTemporary
+                          ? '${participant.name} · 임시'
+                          : participant.name,
                     ),
                   ),
                   Text('${participant.score}'),

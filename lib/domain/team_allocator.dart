@@ -75,8 +75,8 @@ class TeamAllocator {
       teamMembers[temporarySlots[index].teamIndex].add(
         Participant(
           id: _idFactory(),
-          name: '자동 임시 회원 $autoNumber',
-          score: 0,
+          name: '참가자 $autoNumber (자동)',
+          score: 160,
           type: ParticipantType.autoTemporary,
         ),
       );
@@ -94,32 +94,12 @@ class TeamAllocator {
     if (teams.isEmpty) return const [];
     final targetScore = teams.map((team) => team.rawScore).reduce(max);
 
-    return teams.map((team) {
-      var remainingGap = max(0, targetScore - team.rawScore);
-      final autoIndexes = <int>[];
-      for (var index = 0; index < team.participants.length; index++) {
-        if (team.participants[index].type == ParticipantType.autoTemporary) {
-          autoIndexes.add(index);
-        }
-      }
-
-      final updated = [...team.participants];
-      for (var position = 0; position < autoIndexes.length; position++) {
-        final slotsLeft = autoIndexes.length - position;
-        final fairShare = (remainingGap / slotsLeft).ceil();
-        final assigned = min(300, fairShare);
-        final participantIndex = autoIndexes[position];
-        updated[participantIndex] = updated[participantIndex].copyWith(
-          score: assigned,
-        );
-        remainingGap -= assigned;
-      }
-
-      return team.copyWith(
-        participants: updated,
-        bonusScore: max(0, remainingGap),
-      );
-    }).toList();
+    return teams
+        .map(
+          (team) =>
+              team.copyWith(bonusScore: max(0, targetScore - team.rawScore)),
+        )
+        .toList();
   }
 }
 

@@ -58,6 +58,29 @@ void main() {
     expect(controller.hasUnsavedChanges, isTrue);
     expect(controller.errorMessage, isNotNull);
   });
+
+  test('manually entered scores must be between 90 and 200', () async {
+    final repository = MemoryMemberRepository([]);
+    var nextId = 1;
+    final controller = MemberController(
+      repository: repository,
+      idFactory: () => '${nextId++}',
+    );
+    await controller.initialize();
+
+    expect(() => controller.addMember('낮은 점수', 89), throwsArgumentError);
+    expect(() => controller.addMember('높은 점수', 201), throwsArgumentError);
+
+    controller.addMember('최솟값', 90);
+    controller.addMember('최댓값', 200);
+    expect(controller.draftMembers.map((member) => member.score), [90, 200]);
+
+    expect(
+      () => controller.updateScore(controller.draftMembers.first.id, 201),
+      throwsArgumentError,
+    );
+    expect(controller.draftMembers.first.score, 90);
+  });
 }
 
 class MemoryMemberRepository implements MemberRepository {

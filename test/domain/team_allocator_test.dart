@@ -23,8 +23,8 @@ void main() {
 
   Participant automatic(String id) => Participant(
     id: id,
-    name: '자동 임시',
-    score: 0,
+    name: '참가자 (자동)',
+    score: 160,
     type: ParticipantType.autoTemporary,
   );
 
@@ -63,14 +63,15 @@ void main() {
       temporaryCounts.reduce(max) - temporaryCounts.reduce(min),
       lessThanOrEqualTo(1),
     );
-    expect(
-      teams
-          .expand((team) => team.participants)
-          .where(
-            (participant) => participant.type == ParticipantType.autoTemporary,
-          ),
-      hasLength(1),
-    );
+    final automaticParticipants = teams
+        .expand((team) => team.participants)
+        .where(
+          (participant) => participant.type == ParticipantType.autoTemporary,
+        )
+        .toList();
+    expect(automaticParticipants, hasLength(1));
+    expect(automaticParticipants.single.name, '참가자 1 (자동)');
+    expect(automaticParticipants.single.score, 160);
     for (final team in teams) {
       final types = team.participants.map((participant) => participant.type);
       expect(
@@ -122,25 +123,28 @@ void main() {
     },
   );
 
-  test('451 missing points split into 226 and 225', () {
-    final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
+  test(
+    'automatic participant scores stay at 160 and remaining gap is shown',
+    () {
+      final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
 
-    final balanced = allocator.compensateScores([
-      Team(
-        number: 1,
-        participants: [regular('high', 300), regular('high2', 151)],
-      ),
-      Team(number: 2, participants: [automatic('x'), automatic('y')]),
-    ]);
+      final balanced = allocator.compensateScores([
+        Team(
+          number: 1,
+          participants: [regular('high', 300), regular('high2', 151)],
+        ),
+        Team(number: 2, participants: [automatic('x'), automatic('y')]),
+      ]);
 
-    expect(
-      balanced[1].participants.map((participant) => participant.score),
-      orderedEquals([226, 225]),
-    );
-    expect(balanced[1].bonusScore, 0);
-  });
+      expect(
+        balanced[1].participants.map((participant) => participant.score),
+        orderedEquals([160, 160]),
+      );
+      expect(balanced[1].bonusScore, 131);
+    },
+  );
 
-  test('automatic scores cap at 300 and leave remaining points as bonus', () {
+  test('large score gap does not change automatic participant scores', () {
     final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
 
     final balanced = allocator.compensateScores([
@@ -157,9 +161,9 @@ void main() {
 
     expect(
       balanced[1].participants.map((participant) => participant.score),
-      orderedEquals([300, 300]),
+      orderedEquals([160, 160]),
     );
-    expect(balanced[1].bonusScore, 100);
+    expect(balanced[1].bonusScore, 380);
     expect(balanced[1].effectiveScore, 700);
   });
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../domain/manual_score.dart';
 import 'member_controller.dart';
 
 class MemberScreen extends StatefulWidget {
@@ -15,6 +16,7 @@ class MemberScreen extends StatefulWidget {
 class _MemberScreenState extends State<MemberScreen> {
   final _nameController = TextEditingController();
   final _scoreController = TextEditingController();
+  final _invalidScoreMemberIds = <String>{};
 
   @override
   void dispose() {
@@ -27,9 +29,8 @@ class _MemberScreenState extends State<MemberScreen> {
     final score = int.tryParse(_scoreController.text);
     if (_nameController.text.trim().isEmpty ||
         score == null ||
-        score < 0 ||
-        score > 300) {
-      _showMessage('이름과 0~300 사이의 점수를 입력해 주세요.');
+        !isValidManualScore(score)) {
+      _showMessage('이름과 90~200 사이의 점수를 입력해 주세요.');
       return;
     }
     widget.controller.addMember(_nameController.text, score);
@@ -38,11 +39,15 @@ class _MemberScreenState extends State<MemberScreen> {
   }
 
   Future<void> _save() async {
+    if (_invalidScoreMemberIds.isNotEmpty) {
+      _showMessage('모든 점수를 90~200 사이로 입력해 주세요.');
+      return;
+    }
     final saved = await widget.controller.save();
     if (!mounted) return;
     _showMessage(
       saved
-          ? '회원 명단을 저장했습니다.'
+          ? '클럽원 명단을 저장했습니다.'
           : widget.controller.errorMessage ?? '저장하지 못했습니다.',
     );
   }
@@ -73,7 +78,7 @@ class _MemberScreenState extends State<MemberScreen> {
                     controller: _nameController,
                     textInputAction: TextInputAction.next,
                     decoration: const InputDecoration(
-                      labelText: '회원 이름',
+                      labelText: '클럽원 이름',
                       border: OutlineInputBorder(),
                     ),
                   ),
@@ -108,56 +113,79 @@ class _MemberScreenState extends State<MemberScreen> {
               ),
             Expanded(
               child: widget.controller.draftMembers.isEmpty
-                  ? const Center(child: Text('회원 이름과 점수를 추가해 주세요.'))
+                  ? const Center(child: Text('클럽원 이름과 점수를 추가해 주세요.'))
                   : ListView.separated(
                       itemCount: widget.controller.draftMembers.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 6),
                       itemBuilder: (context, index) {
                         final member = widget.controller.draftMembers[index];
                         return Card(
-                          child: ListTile(
-                            title: Text(member.name),
-                            subtitle: const Text('점수'),
-                            trailing: SizedBox(
-                              width: 140,
-                              child: Row(
-                                children: [
-                                  SizedBox(
-                                    width: 76,
-                                    child: TextFormField(
-                                      key: ValueKey(
-                                        'member-score-${member.id}',
-                                      ),
-                                      initialValue: '${member.score}',
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      onChanged: (value) {
-                                        final score = int.tryParse(value);
-                                        if (score != null &&
-                                            score >= 0 &&
-                                            score <= 300) {
-                                          widget.controller.updateScore(
+                          child: Padding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 4, 8),
+                            child: Row(
+                              children: [
+                                Expanded(child: Text(member.name)),
+                                Text(
+                                  '점수',
+                                  key: ValueKey(
+                                    'member-score-label-${member.id}',
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                SizedBox(
+                                  width: 76,
+                                  child: TextFormField(
+                                    key: ValueKey('member-score-${member.id}'),
+                                    initialValue: '${member.score}',
+                                    keyboardType: TextInputType.number,
+                                    inputFormatters: [
+                                      FilteringTextInputFormatter.digitsOnly,
+                                    ],
+                                    autovalidateMode:
+                                        AutovalidateMode.onUserInteraction,
+                                    validator: (value) {
+                                      final score = int.tryParse(value ?? '');
+                                      return score != null &&
+                                              isValidManualScore(score)
+                                          ? null
+                                          : '90~200';
+                                    },
+                                    onChanged: (value) {
+                                      final score = int.tryParse(value);
+                                      final valid =
+                                          score != null &&
+                                          isValidManualScore(score);
+                                      setState(() {
+                                        if (valid) {
+                                          _invalidScoreMemberIds.remove(
                                             member.id,
-                                            score,
                                           );
+                                        } else {
+                                          _invalidScoreMemberIds.add(member.id);
                                         }
-                                      },
-                                      decoration: const InputDecoration(
-                                        isDense: true,
-                                        border: OutlineInputBorder(),
-                                      ),
+                                      });
+                                      if (valid) {
+                                        widget.controller.updateScore(
+                                          member.id,
+                                          score,
+                                        );
+                                      }
+                                    },
+                                    decoration: const InputDecoration(
+                                      isDense: true,
+                                      border: OutlineInputBorder(),
                                     ),
                                   ),
-                                  IconButton(
-                                    tooltip: '회원 삭제',
-                                    onPressed: () => widget.controller
-                                        .deleteMember(member.id),
-                                    icon: const Icon(Icons.delete_outline),
-                                  ),
-                                ],
-                              ),
+                                ),
+                                IconButton(
+                                  tooltip: '클럽원 삭제',
+                                  onPressed: () {
+                                    _invalidScoreMemberIds.remove(member.id);
+                                    widget.controller.deleteMember(member.id);
+                                  },
+                                  icon: const Icon(Icons.delete_outline),
+                                ),
+                              ],
                             ),
                           ),
                         );

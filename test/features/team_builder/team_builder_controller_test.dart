@@ -66,6 +66,32 @@ void main() {
     expect(controller.participants.last.type, ParticipantType.manualTemporary);
   });
 
+  test('manually entered participant scores must be between 90 and 200', () {
+    expect(
+      () => controller.addManualTemporary('낮은 점수', 89),
+      throwsArgumentError,
+    );
+    expect(
+      () => controller.addManualTemporary('높은 점수', 201),
+      throwsArgumentError,
+    );
+
+    controller.addManualTemporary('최솟값', 90);
+    controller.addManualTemporary('최댓값', 200);
+    expect(
+      controller.participants
+          .where((participant) => participant.type.isTemporary)
+          .map((participant) => participant.score),
+      [90, 200],
+    );
+
+    expect(
+      () => controller.updateParticipantScore('participant-1', 89),
+      throwsArgumentError,
+    );
+    expect(controller.participants.first.score, 180);
+  });
+
   test('build creates an unsaved result with a default title', () {
     controller.teamSize = 2;
 

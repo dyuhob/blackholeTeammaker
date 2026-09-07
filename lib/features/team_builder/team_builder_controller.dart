@@ -1,6 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 import '../../domain/member.dart';
+import '../../domain/manual_score.dart';
 import '../../domain/participant.dart';
 import '../../domain/team_allocator.dart';
 import '../../domain/team_result.dart';
@@ -105,6 +106,7 @@ class TeamBuilderController extends ChangeNotifier {
   }
 
   void addManualTemporary(String name, int score) {
+    validateManualScore(score);
     _participants.add(
       Participant(
         id: _idFactory(),
@@ -123,6 +125,7 @@ class TeamBuilderController extends ChangeNotifier {
   }
 
   void updateParticipantScore(String participantId, int score) {
+    validateManualScore(score);
     final index = _participants.indexWhere(
       (participant) => participant.id == participantId,
     );

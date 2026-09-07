@@ -29,7 +29,7 @@ class AppShell extends StatefulWidget {
 class _AppShellState extends State<AppShell> {
   var _index = 0;
 
-  static const _titles = ['회원 관리', '팀짜기', '기록'];
+  static const _titles = ['클럽원 관리', '팀짜기', '기록'];
 
   @override
   Widget build(BuildContext context) => Scaffold(
@@ -56,7 +56,7 @@ class _AppShellState extends State<AppShell> {
         NavigationDestination(
           icon: Icon(Icons.people_outline),
           selectedIcon: Icon(Icons.people),
-          label: '회원 관리',
+          label: '클럽원 관리',
         ),
         NavigationDestination(
           icon: Icon(Icons.shuffle_outlined),
