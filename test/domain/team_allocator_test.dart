@@ -1,0 +1,145 @@
+import 'dart:math';
+
+import 'package:flutter_test/flutter_test.dart';
+import 'package:team_maker/domain/participant.dart';
+import 'package:team_maker/domain/team.dart';
+import 'package:team_maker/domain/team_allocator.dart';
+
+void main() {
+  Participant regular(String id, int score) => Participant(
+    id: id,
+    sourceMemberId: id,
+    name: '회원 $id',
+    score: score,
+    type: ParticipantType.regular,
+  );
+
+  Participant manual(String id, int score) => Participant(
+    id: id,
+    name: '임시 $id',
+    score: score,
+    type: ParticipantType.manualTemporary,
+  );
+
+  Participant automatic(String id) => Participant(
+    id: id,
+    name: '자동 임시',
+    score: 0,
+    type: ParticipantType.autoTemporary,
+  );
+
+  test('allocation fills every team and balances temporary counts', () {
+    var nextId = 0;
+    final allocator = TeamAllocator(
+      random: Random(7),
+      idFactory: () => 'auto-${nextId++}',
+    );
+    final regulars = [
+      regular('1', 180),
+      regular('2', 160),
+      regular('3', 190),
+      regular('4', 140),
+      regular('5', 175),
+      regular('6', 155),
+      regular('7', 145),
+    ];
+
+    final teams = allocator.allocate(
+      regularMembers: regulars,
+      manualTemporaryMembers: [manual('m1', 150)],
+      teamSize: 3,
+    );
+
+    expect(teams, hasLength(3));
+    expect(teams.every((team) => team.participants.length == 3), isTrue);
+    final temporaryCounts = teams
+        .map(
+          (team) => team.participants
+              .where((participant) => participant.type.isTemporary)
+              .length,
+        )
+        .toList();
+    expect(
+      temporaryCounts.reduce(max) - temporaryCounts.reduce(min),
+      lessThanOrEqualTo(1),
+    );
+    expect(
+      teams.expand((team) => team.participants).where(
+        (participant) => participant.type == ParticipantType.autoTemporary,
+      ),
+      hasLength(1),
+    );
+    for (final team in teams) {
+      final types = team.participants.map((participant) => participant.type);
+      expect(types, orderedEquals([...types]..sort((a, b) => a.order - b.order)));
+    }
+  });
+
+  test('score compensation reaches the highest score and shows full-team gap', () {
+    final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
+    final teams = [
+      Team(
+        number: 1,
+        participants: [regular('a', 180), regular('b', 160), manual('m', 150)],
+      ),
+      Team(
+        number: 2,
+        participants: [regular('c', 190), regular('d', 140), automatic('x')],
+      ),
+      Team(
+        number: 3,
+        participants: [regular('e', 175), regular('f', 155), regular('g', 145)],
+      ),
+    ];
+
+    final balanced = allocator.compensateScores(teams);
+
+    expect(balanced[0].rawScore, 490);
+    expect(balanced[0].bonusScore, 0);
+    expect(
+      balanced[1].participants.last.score,
+      160,
+      reason: 'the automatic member must close the 160 point gap',
+    );
+    expect(balanced[1].rawScore, 490);
+    expect(balanced[2].rawScore, 475);
+    expect(balanced[2].bonusScore, 15);
+  });
+
+  test('451 missing points split into 226 and 225', () {
+    final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
+
+    final balanced = allocator.compensateScores([
+      Team(number: 1, participants: [regular('high', 300), regular('high2', 151)]),
+      Team(
+        number: 2,
+        participants: [automatic('x'), automatic('y')],
+      ),
+    ]);
+
+    expect(
+      balanced[1].participants.map((participant) => participant.score),
+      orderedEquals([226, 225]),
+    );
+    expect(balanced[1].bonusScore, 0);
+  });
+
+  test('automatic scores cap at 300 and leave remaining points as bonus', () {
+    final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
+
+    final balanced = allocator.compensateScores([
+      Team(number: 1, participants: [regular('high', 300), regular('high2', 300), regular('high3', 100)]),
+      Team(
+        number: 2,
+        participants: [automatic('x'), automatic('y')],
+      ),
+    ]);
+
+    expect(
+      balanced[1].participants.map((participant) => participant.score),
+      orderedEquals([300, 300]),
+    );
+    expect(balanced[1].bonusScore, 100);
+    expect(balanced[1].effectiveScore, 700);
+  });
+}
