@@ -32,7 +32,7 @@ migrate_working_dir/
 .pub/
 /build/
 /coverage/
-.vercel/
+.vercel
 
 # Symbolication related
 app.*.symbols
