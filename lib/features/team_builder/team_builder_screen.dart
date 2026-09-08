@@ -4,7 +4,7 @@ import 'package:flutter/services.dart';
 import '../../domain/manual_score.dart';
 import '../../domain/member.dart';
 import '../../domain/participant.dart';
-import '../../services/gallery_export_service.dart';
+import '../../services/gallery_exporter.dart';
 import '../history/history_controller.dart';
 import '../history/team_result_screen.dart';
 import 'team_builder_controller.dart';

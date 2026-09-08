@@ -10,7 +10,7 @@ import '../domain/team_allocator.dart';
 import '../features/history/history_controller.dart';
 import '../features/members/member_controller.dart';
 import '../features/team_builder/team_builder_controller.dart';
-import '../services/gallery_export_service.dart';
+import '../services/gallery_exporter.dart';
 import 'app_shell.dart';
 
 class TeamMakerApp extends StatefulWidget {

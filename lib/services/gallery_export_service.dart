@@ -1,40 +1,32 @@
 import 'package:flutter/material.dart';
 import 'package:gal/gal.dart';
-import 'package:screenshot/screenshot.dart';
 
 import '../domain/team_result.dart';
-import '../features/history/team_result_content.dart';
-
-abstract interface class GalleryExporter {
-  Future<void> save(BuildContext context, TeamResult result);
-}
+import 'gallery_exporter.dart';
+import 'team_result_image_renderer.dart';
 
 class GalleryExportService implements GalleryExporter {
   const GalleryExportService();
 
   @override
+  String get actionLabel => '갤러리에 저장';
+
+  @override
+  String get busyLabel => '이미지 생성 중…';
+
+  @override
+  String get successMessage => '갤러리에 저장했습니다.';
+
+  @override
+  String get failureMessage => '갤러리에 저장하지 못했습니다.';
+
+  @override
   Future<void> save(BuildContext context, TeamResult result) async {
-    final bytes = await ScreenshotController().captureFromLongWidget(
-      InheritedTheme.captureAll(
-        context,
-        Material(
-          color: Colors.white,
-          child: TeamResultExportWidget(result: result),
-        ),
-      ),
-      context: context,
-      constraints: const BoxConstraints(maxWidth: 720),
-      pixelRatio: 2,
-      delay: const Duration(milliseconds: 50),
-    );
-    final safeTitle = result.title.replaceAll(
-      RegExp(r'[^0-9A-Za-z가-힣_-]'),
-      '_',
-    );
+    final bytes = await captureTeamResultImage(context, result);
     await Gal.putImageBytes(
       bytes,
       album: '팀짜기',
-      name: '${safeTitle}_${result.createdAt.millisecondsSinceEpoch}',
+      name: teamResultImageName(result),
     );
   }
 }

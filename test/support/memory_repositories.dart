@@ -3,7 +3,7 @@ import 'package:team_maker/data/member_repository.dart';
 import 'package:team_maker/data/team_history_repository.dart';
 import 'package:team_maker/domain/member.dart';
 import 'package:team_maker/domain/team_result.dart';
-import 'package:team_maker/services/gallery_export_service.dart';
+import 'package:team_maker/services/gallery_exporter.dart';
 
 class MemoryMemberRepository implements MemberRepository {
   MemoryMemberRepository([List<Member> initial = const []])
@@ -43,6 +43,25 @@ class MemoryHistoryRepository implements TeamHistoryRepository {
 }
 
 class MemoryGalleryExporter implements GalleryExporter {
+  MemoryGalleryExporter({
+    this.actionLabel = '갤러리에 저장',
+    this.busyLabel = '이미지 생성 중…',
+    this.successMessage = '갤러리에 저장했습니다.',
+    this.failureMessage = '갤러리에 저장하지 못했습니다.',
+  });
+
+  @override
+  final String actionLabel;
+
+  @override
+  final String busyLabel;
+
+  @override
+  final String successMessage;
+
+  @override
+  final String failureMessage;
+
   final List<TeamResult> saved = [];
 
   @override

@@ -6,7 +6,7 @@ import '../features/members/member_controller.dart';
 import '../features/members/member_screen.dart';
 import '../features/team_builder/team_builder_controller.dart';
 import '../features/team_builder/team_builder_screen.dart';
-import '../services/gallery_export_service.dart';
+import '../services/gallery_exporter.dart';
 
 class AppShell extends StatefulWidget {
   const AppShell({

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../domain/team_result.dart';
-import '../../services/gallery_export_service.dart';
+import '../../services/gallery_exporter.dart';
 import 'history_controller.dart';
 import 'team_result_content.dart';
 
@@ -85,9 +85,11 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
     );
     try {
       await widget.galleryExporter.save(context, exportResult);
-      if (mounted) _showMessage('갤러리에 저장했습니다.');
+      if (mounted) _showMessage(widget.galleryExporter.successMessage);
     } catch (error) {
-      if (mounted) _showMessage('갤러리에 저장하지 못했습니다: $error');
+      if (mounted) {
+        _showMessage('${widget.galleryExporter.failureMessage}: $error');
+      }
     } finally {
       if (mounted) setState(() => _exporting = false);
     }
@@ -153,7 +155,11 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
               child: OutlinedButton.icon(
                 onPressed: _exporting ? null : _saveGallery,
                 icon: const Icon(Icons.image_outlined),
-                label: Text(_exporting ? '이미지 생성 중…' : '갤러리에 저장'),
+                label: Text(
+                  _exporting
+                      ? widget.galleryExporter.busyLabel
+                      : widget.galleryExporter.actionLabel,
+                ),
               ),
             ),
             const SizedBox(width: 12),

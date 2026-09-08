@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import '../../services/gallery_export_service.dart';
+import '../../services/gallery_exporter.dart';
 import 'history_controller.dart';
 import 'team_result_content.dart';
 import 'team_result_screen.dart';
@@ -65,7 +65,7 @@ class HistoryScreen extends StatelessWidget {
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('기록을 삭제할까요?'),
-        content: const Text('앱 내부 기록만 삭제되며 갤러리 이미지는 유지됩니다.'),
+        content: const Text('앱 내부 기록만 삭제되며 이미 저장한 이미지는 유지됩니다.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
