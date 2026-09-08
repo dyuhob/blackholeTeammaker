@@ -56,7 +56,7 @@ void main() {
     () {
       final worker = File('web/service_worker.js').readAsStringSync();
 
-      expect(worker, contains("const CACHE_NAME = 'team-maker-v1'"));
+      expect(worker, contains("const CACHE_NAME = 'team-maker-v2'"));
       expect(worker, contains("addEventListener('install'"));
       expect(worker, contains('skipWaiting()'));
       expect(worker, contains("addEventListener('activate'"));

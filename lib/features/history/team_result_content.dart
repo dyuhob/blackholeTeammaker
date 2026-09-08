@@ -55,80 +55,81 @@ class _TeamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     margin: const EdgeInsets.only(bottom: 12),
-    child: Padding(
-      padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          Text(
-            '${team.number}팀',
-            style: Theme.of(context).textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          for (final participant in team.participants)
-            Padding(
-              padding: const EdgeInsets.symmetric(vertical: 4),
-              child: Row(
-                children: [
-                  Expanded(
-                    child: Text(
-                      participant.type == ParticipantType.manualTemporary
-                          ? '${participant.name} · 임시'
-                          : participant.name,
-                    ),
-                  ),
-                  Text('${participant.score}'),
-                ],
+    clipBehavior: Clip.antiAlias,
+    child: Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                '${team.number}팀',
+                style: Theme.of(context).textTheme.titleLarge
+                    ?.copyWith(fontWeight: FontWeight.bold),
               ),
-            ),
-          const SizedBox(height: 8),
-          Container(
-            key: ValueKey('team-total-panel-${team.number}'),
-            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
-            decoration: BoxDecoration(
-              color: const Color(0xFF1976D2),
-              border: Border.all(color: const Color(0xFF1976D2)),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: Row(
-              children: [
-                const Expanded(
-                  child: Text(
-                    '총점',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.bold,
-                    ),
+              const SizedBox(height: 8),
+              for (final participant in team.participants)
+                Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  child: Row(
+                    children: [
+                      Expanded(child: Text(_participantLabel(participant))),
+                      Text('${participant.score}'),
+                    ],
                   ),
                 ),
-                Text(
-                  '${team.rawScore}',
-                  key: ValueKey('team-total-score-${team.number}'),
-                  style: const TextStyle(
+            ],
+          ),
+        ),
+        Container(
+          key: ValueKey('team-total-panel-${team.number}'),
+          width: double.infinity,
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+          color: const Color(0xFF1976D2),
+          child: Row(
+            children: [
+              const Expanded(
+                child: Text(
+                  '총점',
+                  style: TextStyle(
                     color: Colors.white,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                if (team.bonusScore > 0) ...[
-                  const SizedBox(width: 4),
-                  Text(
-                    '+${team.bonusScore}',
-                    key: ValueKey('team-bonus-score-${team.number}'),
-                    style: const TextStyle(
-                      color: Color(0xFF69F0AE),
-                      fontWeight: FontWeight.bold,
-                    ),
+              ),
+              Text(
+                '${team.rawScore}',
+                key: ValueKey('team-total-score-${team.number}'),
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              if (team.bonusScore > 0) ...[
+                const SizedBox(width: 16),
+                Text(
+                  '+${team.bonusScore}',
+                  key: ValueKey('team-bonus-score-${team.number}'),
+                  style: const TextStyle(
+                    color: Color(0xFF69F0AE),
+                    fontWeight: FontWeight.bold,
                   ),
-                ],
+                ),
               ],
-            ),
+            ],
           ),
-        ],
-      ),
+        ),
+      ],
     ),
   );
 }
+
+String _participantLabel(Participant participant) =>
+    participant.type == ParticipantType.manualTemporary
+    ? '${participant.name} (게스트)'
+    : participant.name;
 
 String formatDateTime(DateTime value) =>
     '${value.year.toString().padLeft(4, '0')}-'

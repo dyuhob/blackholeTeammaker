@@ -70,7 +70,7 @@ void main() {
         )
         .toList();
     expect(automaticParticipants, hasLength(1));
-    expect(automaticParticipants.single.name, '참가자 1 (자동)');
+    expect(automaticParticipants.single.name, '게스트 1 (자동)');
     expect(automaticParticipants.single.score, 160);
     for (final team in teams) {
       final types = team.participants.map((participant) => participant.type);

@@ -117,7 +117,7 @@ void main() {
     await tester.tap(find.byKey(const Key('build-teams-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('참가자 1 (자동)'), findsOneWidget);
+    expect(find.text('게스트 1 (자동)'), findsOneWidget);
     expect(find.text('160'), findsOneWidget);
   });
 }

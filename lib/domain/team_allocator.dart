@@ -22,7 +22,7 @@ class TeamAllocator {
       throw ArgumentError('참가자가 한 명 이상 필요합니다.');
     }
 
-    final teamCount = (selectedCount / teamSize).ceil();
+    final teamCount = max(2, (selectedCount / teamSize).ceil());
     final capacity = teamCount * teamSize;
     final automaticCount = capacity - selectedCount;
     final totalTemporaryCount = manualTemporaryMembers.length + automaticCount;
@@ -75,7 +75,7 @@ class TeamAllocator {
       teamMembers[temporarySlots[index].teamIndex].add(
         Participant(
           id: _idFactory(),
-          name: '참가자 $autoNumber (자동)',
+          name: '게스트 $autoNumber (자동)',
           score: 160,
           type: ParticipantType.autoTemporary,
         ),

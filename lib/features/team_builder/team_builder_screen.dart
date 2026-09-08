@@ -138,7 +138,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             height: _controlHeight,
             child: TextField(
               controller: _titleController,
-              decoration: _inputDecoration('편성 제목 (선택)'),
+              decoration: _inputDecoration('팀 편성 이름'),
             ),
           ),
           const SizedBox(height: 8),
