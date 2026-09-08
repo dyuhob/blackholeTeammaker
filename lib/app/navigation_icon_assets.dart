@@ -1,14 +1,18 @@
 import 'package:flutter/material.dart';
 
 abstract final class NavigationIconAssets {
-  // PNG, WebP, JPEG 파일을 assets/navigation 아래에 넣은 뒤 경로를 지정하세요.
-  // null이면 현재 Material 아이콘이 사용됩니다.
-  static const String? membersOutline = null;
-  static const String? membersFilled = null;
-  static const String? teamsOutline = null;
-  static const String? teamsFilled = null;
-  static const String? historyOutline = null;
-  static const String? historyFilled = null;
+  static const membersOutline = 'assets/navigation/users3-outline-96x96.png';
+  static const membersFilled = 'assets/navigation/users3-filled-96x96.png';
+  static const teamsOutline = 'assets/navigation/bowling-outline-96x96.png';
+  static const teamsFilled = 'assets/navigation/bowling-filled-96x96.png';
+  static const historyOutline = 'assets/navigation/archive-outline-96x96.png';
+  static const historyFilled = 'assets/navigation/archive-filled-96x96.png';
+
+  static const memberDelete = 'assets/navigation/trash6-outline-96x96.png';
+  static const buildTeams = 'assets/navigation/shuffle-outline-96x96.png';
+  static const participantRemove =
+      'assets/navigation/x-square-filled-96x96.png';
+  static const participantAdd = 'assets/navigation/add-square-filled-96x96.png';
 }
 
 class NavigationTabIcon extends StatelessWidget {

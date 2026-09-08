@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../app/navigation_icon_assets.dart';
 import '../../domain/manual_score.dart';
 import '../../domain/member.dart';
 import '../../domain/participant.dart';
@@ -169,7 +170,9 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                   child: FilledButton.icon(
                     key: const Key('build-teams-button'),
                     onPressed: participants.isEmpty ? null : _buildTeams,
-                    icon: const Icon(Icons.shuffle),
+                    icon: const ImageIcon(
+                      AssetImage(NavigationIconAssets.buildTeams),
+                    ),
                     label: const Text('팀짜기'),
                   ),
                 ),
@@ -191,7 +194,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     _invalidScoreParticipantIds.clear();
                     widget.controller.resetAllMembers();
                   },
-                  child: const Text('전체 다시 추가'),
+                  child: const Text('전체 추가'),
                 ),
               ],
             ),
@@ -300,7 +303,7 @@ class _GuestAddCard extends StatelessWidget {
         children: [
           Text('게스트 추가'),
           SizedBox(width: 4),
-          Icon(Icons.add, size: 19),
+          ImageIcon(AssetImage(NavigationIconAssets.participantAdd), size: 19),
         ],
       ),
     ),
@@ -337,7 +340,9 @@ class _UnselectedMemberCard extends StatelessWidget {
             constraints: const BoxConstraints.tightFor(width: 32, height: 32),
             padding: EdgeInsets.zero,
             iconSize: 19,
-            icon: const Icon(Icons.add_circle_outline),
+            icon: const ImageIcon(
+              AssetImage(NavigationIconAssets.participantAdd),
+            ),
           ),
         ],
       ),
@@ -360,6 +365,12 @@ class _ParticipantCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     key: ValueKey('participant-card-${participant.id}'),
     margin: EdgeInsets.zero,
+    color: Colors.white,
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(
+      side: const BorderSide(color: _focusedInputColor),
+      borderRadius: BorderRadius.circular(12),
+    ),
     child: Padding(
       padding: const EdgeInsets.only(left: 9),
       child: Row(
@@ -369,7 +380,7 @@ class _ParticipantCard extends StatelessWidget {
               participant.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13),
+              style: const TextStyle(fontSize: 13, color: _focusedInputColor),
             ),
           ),
           const SizedBox(width: 3),
@@ -402,7 +413,10 @@ class _ParticipantCard extends StatelessWidget {
             constraints: const BoxConstraints.tightFor(width: 32, height: 32),
             padding: EdgeInsets.zero,
             iconSize: 19,
-            icon: const Icon(Icons.close),
+            color: _focusedInputColor,
+            icon: const ImageIcon(
+              AssetImage(NavigationIconAssets.participantRemove),
+            ),
           ),
         ],
       ),

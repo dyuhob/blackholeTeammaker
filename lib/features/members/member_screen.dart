@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
+import '../../app/navigation_icon_assets.dart';
 import '../../domain/manual_score.dart';
 import 'member_controller.dart';
 
@@ -221,7 +222,11 @@ class _MemberScreenState extends State<MemberScreen> {
                                     ),
                                     padding: EdgeInsets.zero,
                                     iconSize: 20,
-                                    icon: const Icon(Icons.delete_outline),
+                                    icon: const ImageIcon(
+                                      AssetImage(
+                                        NavigationIconAssets.memberDelete,
+                                      ),
+                                    ),
                                   ),
                                 ],
                               ),
