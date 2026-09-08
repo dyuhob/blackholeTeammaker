@@ -2,8 +2,8 @@ import 'dart:io';
 
 import 'package:flutter_test/flutter_test.dart';
 import 'package:team_maker/core/storage/atomic_json_file.dart';
-import 'package:team_maker/data/file_member_repository.dart';
-import 'package:team_maker/data/file_team_history_repository.dart';
+import 'package:team_maker/data/json_member_repository.dart';
+import 'package:team_maker/data/json_team_history_repository.dart';
 import 'package:team_maker/domain/member.dart';
 import 'package:team_maker/domain/participant.dart';
 import 'package:team_maker/domain/team.dart';
@@ -26,13 +26,13 @@ void main() {
       AtomicJsonFile(directoryProvider: () async => directory, fileName: name);
 
   test('member repository returns empty list when file is missing', () async {
-    final repository = FileMemberRepository(file('members_v1.json'));
+    final repository = JsonMemberRepository(file('members_v1.json'));
 
     expect(await repository.loadAll(), isEmpty);
   });
 
   test('member repository saves and reloads the complete roster', () async {
-    final repository = FileMemberRepository(file('members_v1.json'));
+    final repository = JsonMemberRepository(file('members_v1.json'));
     final members = [
       Member(id: '1', name: '김회원', score: 180),
       Member(id: '2', name: '이회원', score: 165),
@@ -46,7 +46,7 @@ void main() {
   test(
     'atomic JSON falls back to backup when the main file is corrupt',
     () async {
-      final repository = FileMemberRepository(file('members_v1.json'));
+      final repository = JsonMemberRepository(file('members_v1.json'));
       final first = [Member(id: '1', name: '복구 회원', score: 170)];
       await repository.saveAll(first);
       await repository.saveAll([
@@ -68,7 +68,7 @@ void main() {
   test(
     'history repository saves, updates, sorts, and deletes records',
     () async {
-      final repository = FileTeamHistoryRepository(
+      final repository = JsonTeamHistoryRepository(
         file('team_history_v1.json'),
       );
       final older = result('old', '이전 결과', DateTime(2026, 9, 1));

@@ -1,15 +1,15 @@
-import '../core/storage/atomic_json_file.dart';
+import '../core/storage/json_object_store.dart';
 import '../domain/team_result.dart';
 import 'team_history_repository.dart';
 
-class FileTeamHistoryRepository implements TeamHistoryRepository {
-  const FileTeamHistoryRepository(this._file);
+class JsonTeamHistoryRepository implements TeamHistoryRepository {
+  const JsonTeamHistoryRepository(this._store);
 
-  final AtomicJsonFile _file;
+  final JsonObjectStore _store;
 
   @override
   Future<List<TeamResult>> loadAll() async {
-    final json = await _file.read();
+    final json = await _store.read();
     if (json == null) return <TeamResult>[];
     if (json['schemaVersion'] != 1) {
       throw const FormatException('Unsupported history schema version.');
@@ -24,11 +24,11 @@ class FileTeamHistoryRepository implements TeamHistoryRepository {
   @override
   Future<void> save(TeamResult result) async {
     final results = await loadAll();
-    final existingIndex = results.indexWhere((value) => value.id == result.id);
-    if (existingIndex == -1) {
+    final index = results.indexWhere((value) => value.id == result.id);
+    if (index == -1) {
       results.add(result);
     } else {
-      results[existingIndex] = result;
+      results[index] = result;
     }
     await _writeAll(results);
   }
@@ -40,7 +40,7 @@ class FileTeamHistoryRepository implements TeamHistoryRepository {
     await _writeAll(results);
   }
 
-  Future<void> _writeAll(List<TeamResult> results) => _file.write({
+  Future<void> _writeAll(List<TeamResult> results) => _store.write({
     'schemaVersion': 1,
     'records': results.map((result) => result.toJson()).toList(),
   });

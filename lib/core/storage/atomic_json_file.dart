@@ -1,7 +1,9 @@
 import 'dart:convert';
 import 'dart:io';
 
-class AtomicJsonFile {
+import 'json_object_store.dart';
+
+class AtomicJsonFile implements JsonObjectStore {
   const AtomicJsonFile({
     required this.directoryProvider,
     required this.fileName,
@@ -10,6 +12,7 @@ class AtomicJsonFile {
   final Future<Directory> Function() directoryProvider;
   final String fileName;
 
+  @override
   Future<Map<String, Object?>?> read() async {
     final directory = await directoryProvider();
     final mainFile = File(
@@ -36,6 +39,7 @@ class AtomicJsonFile {
     }
   }
 
+  @override
   Future<void> write(Map<String, Object?> value) async {
     final directory = await directoryProvider();
     if (!await directory.exists()) {

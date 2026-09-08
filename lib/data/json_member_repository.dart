@@ -1,15 +1,15 @@
-import '../core/storage/atomic_json_file.dart';
+import '../core/storage/json_object_store.dart';
 import '../domain/member.dart';
 import 'member_repository.dart';
 
-class FileMemberRepository implements MemberRepository {
-  const FileMemberRepository(this._file);
+class JsonMemberRepository implements MemberRepository {
+  const JsonMemberRepository(this._store);
 
-  final AtomicJsonFile _file;
+  final JsonObjectStore _store;
 
   @override
   Future<List<Member>> loadAll() async {
-    final json = await _file.read();
+    final json = await _store.read();
     if (json == null) return const [];
     if (json['schemaVersion'] != 1) {
       throw const FormatException('Unsupported members schema version.');
@@ -20,7 +20,7 @@ class FileMemberRepository implements MemberRepository {
   }
 
   @override
-  Future<void> saveAll(List<Member> members) => _file.write({
+  Future<void> saveAll(List<Member> members) => _store.write({
     'schemaVersion': 1,
     'members': members.map((member) => member.toJson()).toList(),
   });
