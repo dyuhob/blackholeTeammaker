@@ -52,13 +52,13 @@ void main() {
       expect(worker, contains('clients.claim()'));
       expect(worker, contains("addEventListener('fetch'"));
       expect(worker, contains('await fetch(request)'));
-    expect(worker, contains('cache.put(request, response.clone())'));
-    expect(worker, contains('caches.match(request)'));
-    expect(worker, contains("caches.match('/index.html')"));
-    expect(worker, contains("'/assets/FontManifest.json'"));
-    expect(worker, contains("'/assets/fonts/MaterialIcons-Regular.otf'"));
-    expect(worker, contains("'/canvaskit/canvaskit.wasm'"));
-    expect(worker, contains("'/canvaskit/chromium/canvaskit.wasm'"));
+      expect(worker, contains('cache.put(request, response.clone())'));
+      expect(worker, contains('caches.match(request)'));
+      expect(worker, contains("caches.match('/index.html')"));
+      expect(worker, contains("'/assets/FontManifest.json'"));
+      expect(worker, contains("'/assets/fonts/MaterialIcons-Regular.otf'"));
+      expect(worker, contains("'/canvaskit/canvaskit.wasm'"));
+      expect(worker, contains("'/canvaskit/chromium/canvaskit.wasm'"));
     },
   );
 
