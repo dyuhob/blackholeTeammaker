@@ -82,22 +82,47 @@ class _TeamCard extends StatelessWidget {
                 ],
               ),
             ),
-          const Divider(),
-          Row(
-            children: [
-              const Expanded(
-                child: Text(
-                  '총점',
-                  style: TextStyle(fontWeight: FontWeight.bold),
+          const SizedBox(height: 8),
+          Container(
+            key: ValueKey('team-total-panel-${team.number}'),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 9),
+            decoration: BoxDecoration(
+              color: const Color(0xFF1976D2),
+              border: Border.all(color: const Color(0xFF1976D2)),
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                const Expanded(
+                  child: Text(
+                    '총점',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
                 ),
-              ),
-              Text(
-                team.bonusScore > 0
-                    ? '${team.rawScore} +${team.bonusScore}'
-                    : '${team.rawScore}',
-                style: const TextStyle(fontWeight: FontWeight.bold),
-              ),
-            ],
+                Text(
+                  '${team.rawScore}',
+                  key: ValueKey('team-total-score-${team.number}'),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+                if (team.bonusScore > 0) ...[
+                  const SizedBox(width: 4),
+                  Text(
+                    '+${team.bonusScore}',
+                    key: ValueKey('team-bonus-score-${team.number}'),
+                    style: const TextStyle(
+                      color: Color(0xFF69F0AE),
+                      fontWeight: FontWeight.bold,
+                    ),
+                  ),
+                ],
+              ],
+            ),
           ),
         ],
       ),

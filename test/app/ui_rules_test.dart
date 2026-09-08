@@ -78,8 +78,8 @@ void main() {
     await tester.tap(find.text('팀짜기').last);
     await tester.pumpAndSettle();
 
-    expect(find.text('제외된 클럽원'), findsOneWidget);
-    await tester.tap(find.text('임시 클럽원 추가'));
+    expect(find.text('미참여 클럽원'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('guest-add-card')));
     await tester.pumpAndSettle();
     await tester.enterText(
       find.byKey(const Key('temporary-name-input')),
@@ -101,7 +101,7 @@ void main() {
     await tester.tap(find.byKey(const Key('add-temporary-button')));
     await tester.pumpAndSettle();
     expect(find.text('게스트'), findsOneWidget);
-    expect(find.text('임시 클럽원'), findsWidgets);
+    expect(find.byKey(const Key('guest-add-card')), findsOneWidget);
   });
 
   testWidgets('automatic filler is displayed as a 160 point participant', (

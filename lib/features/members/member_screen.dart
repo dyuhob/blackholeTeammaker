@@ -192,15 +192,14 @@ class _MemberScreenState extends State<MemberScreen> {
                       },
                     ),
             ),
-            FilledButton.icon(
+            FilledButton(
               key: const Key('save-members-button'),
               onPressed:
                   widget.controller.hasUnsavedChanges &&
                       !widget.controller.isSaving
                   ? _save
                   : null,
-              icon: const Icon(Icons.save_outlined),
-              label: Text(widget.controller.isSaving ? '저장 중…' : '저장'),
+              child: Text(widget.controller.isSaving ? '저장 중…' : '저장'),
             ),
           ],
         ),

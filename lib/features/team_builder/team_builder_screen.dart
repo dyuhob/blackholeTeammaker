@@ -2,10 +2,17 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import '../../domain/manual_score.dart';
+import '../../domain/member.dart';
+import '../../domain/participant.dart';
 import '../../services/gallery_export_service.dart';
 import '../history/history_controller.dart';
 import '../history/team_result_screen.dart';
 import 'team_builder_controller.dart';
+
+const _controlHeight = 48.0;
+const _compactCardHeight = 52.0;
+const _gridGap = 6.0;
+const _focusedInputColor = Color(0xFF42A5F5);
 
 class TeamBuilderScreen extends StatefulWidget {
   const TeamBuilderScreen({
@@ -89,6 +96,30 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     }
   }
 
+  void _updateParticipantScore(Participant participant, String value) {
+    final score = int.tryParse(value);
+    final valid = score != null && isValidManualScore(score);
+    setState(() {
+      if (valid) {
+        _invalidScoreParticipantIds.remove(participant.id);
+      } else {
+        _invalidScoreParticipantIds.add(participant.id);
+      }
+    });
+    if (valid) {
+      widget.controller.updateParticipantScore(participant.id, score);
+    }
+  }
+
+  void _removeParticipant(Participant participant) {
+    _invalidScoreParticipantIds.remove(participant.id);
+    if (participant.type.isTemporary) {
+      widget.controller.removeParticipant(participant.id);
+    } else {
+      widget.controller.excludeMember(participant.sourceMemberId!);
+    }
+  }
+
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
@@ -97,161 +128,280 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
     animation: widget.controller,
-    builder: (context, _) => ListView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 96),
-      children: [
-        TextField(
-          controller: _titleController,
-          decoration: const InputDecoration(
-            labelText: '편성 제목 (선택)',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 12),
-        TextField(
-          key: const Key('team-size-input'),
-          controller: _teamSizeController,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: const InputDecoration(
-            labelText: '팀당 인원수',
-            border: OutlineInputBorder(),
-          ),
-        ),
-        const SizedBox(height: 20),
-        Row(
-          children: [
-            Text('제외된 클럽원', style: Theme.of(context).textTheme.titleMedium),
-            const Spacer(),
-            TextButton.icon(
-              onPressed: () {
-                _invalidScoreParticipantIds.clear();
-                widget.controller.resetAllMembers();
-              },
-              icon: const Icon(Icons.group_add_outlined),
-              label: const Text('전체 클럽원 다시 추가'),
+    builder: (context, _) {
+      final availableMembers = widget.controller.availableMembers;
+      final participants = widget.controller.participants;
+      return ListView(
+        padding: const EdgeInsets.all(16),
+        children: [
+          SizedBox(
+            height: _controlHeight,
+            child: TextField(
+              controller: _titleController,
+              decoration: _inputDecoration('편성 제목 (선택)'),
             ),
-          ],
-        ),
-        if (widget.controller.availableMembers.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 12),
-            child: Text('제외된 클럽원이 없습니다.'),
-          )
-        else
-          for (final member in widget.controller.availableMembers)
-            ListTile(
-              title: Text(member.name),
-              subtitle: Text('${member.score}점'),
-              trailing: IconButton(
-                tooltip: '참가자에 추가',
-                onPressed: () => widget.controller.addSavedMember(member.id),
-                icon: const Icon(Icons.add_circle_outline),
-              ),
-            ),
-        const Divider(height: 28),
-        Text('현재 참가자', style: Theme.of(context).textTheme.titleMedium),
-        const SizedBox(height: 8),
-        if (widget.controller.participants.isEmpty)
-          const Padding(
-            padding: EdgeInsets.symmetric(vertical: 16),
-            child: Text('참가자를 한 명 이상 추가해 주세요.'),
           ),
-        for (final participant in widget.controller.participants) ...[
-          if (participant.type.isTemporary &&
-              widget.controller.participants.indexOf(participant) > 0 &&
-              !widget
-                  .controller
-                  .participants[widget.controller.participants.indexOf(
-                        participant,
-                      ) -
-                      1]
-                  .type
-                  .isTemporary)
-            const Padding(
-              padding: EdgeInsets.only(top: 12, bottom: 4),
-              child: Text('임시 클럽원'),
-            ),
-          Card(
-            child: ListTile(
-              title: Text(participant.name),
-              subtitle: participant.type.isTemporary
-                  ? const Text('임시 클럽원')
-                  : null,
-              trailing: SizedBox(
-                width: 140,
-                child: Row(
-                  children: [
-                    SizedBox(
-                      width: 76,
-                      child: TextFormField(
-                        key: ValueKey('participant-score-${participant.id}'),
-                        initialValue: '${participant.score}',
-                        keyboardType: TextInputType.number,
-                        inputFormatters: [
-                          FilteringTextInputFormatter.digitsOnly,
-                        ],
-                        onChanged: (value) {
-                          final score = int.tryParse(value);
-                          final valid =
-                              score != null && isValidManualScore(score);
-                          setState(() {
-                            if (valid) {
-                              _invalidScoreParticipantIds.remove(
-                                participant.id,
-                              );
-                            } else {
-                              _invalidScoreParticipantIds.add(participant.id);
-                            }
-                          });
-                          if (valid) {
-                            widget.controller.updateParticipantScore(
-                              participant.id,
-                              score,
-                            );
-                          }
-                        },
-                        decoration: const InputDecoration(
-                          isDense: true,
-                          border: OutlineInputBorder(),
-                        ),
-                      ),
+          const SizedBox(height: 8),
+          SizedBox(
+            height: _controlHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  child: SizedBox(
+                    key: const Key('team-size-control'),
+                    child: TextField(
+                      key: const Key('team-size-input'),
+                      controller: _teamSizeController,
+                      keyboardType: TextInputType.number,
+                      inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                      decoration: _inputDecoration('팀당 인원수'),
                     ),
-                    IconButton(
-                      tooltip: '참가자 제외',
-                      onPressed: () {
-                        _invalidScoreParticipantIds.remove(participant.id);
-                        if (participant.type.isTemporary) {
-                          widget.controller.removeParticipant(participant.id);
-                        } else {
-                          widget.controller.excludeMember(
-                            participant.sourceMemberId!,
-                          );
-                        }
-                      },
-                      icon: const Icon(Icons.close),
-                    ),
-                  ],
+                  ),
                 ),
+                const SizedBox(width: 8),
+                Expanded(
+                  flex: 2,
+                  child: FilledButton.icon(
+                    key: const Key('build-teams-button'),
+                    onPressed: participants.isEmpty ? null : _buildTeams,
+                    icon: const Icon(Icons.shuffle),
+                    label: const Text('팀짜기'),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(
+            height: 40,
+            child: Row(
+              children: [
+                Text(
+                  '미참여 클럽원',
+                  key: const Key('unselected-section-title'),
+                  style: Theme.of(context).textTheme.titleMedium,
+                ),
+                const Spacer(),
+                TextButton(
+                  onPressed: () {
+                    _invalidScoreParticipantIds.clear();
+                    widget.controller.resetAllMembers();
+                  },
+                  child: const Text('전체 다시 추가'),
+                ),
+              ],
+            ),
+          ),
+          _CompactGrid(
+            itemCount: availableMembers.length + 1,
+            itemBuilder: (context, index) {
+              if (index == 0) return _GuestAddCard(onTap: _addTemporary);
+              final member = availableMembers[index - 1];
+              return _UnselectedMemberCard(
+                member: member,
+                onAdd: () => widget.controller.addSavedMember(member.id),
+              );
+            },
+          ),
+          const Divider(height: 17),
+          SizedBox(
+            height: 32,
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                '현재 참가자',
+                style: Theme.of(context).textTheme.titleMedium,
               ),
             ),
+          ),
+          if (participants.isEmpty)
+            const SizedBox(
+              height: _compactCardHeight,
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text('참가자를 한 명 이상 추가해 주세요.'),
+              ),
+            )
+          else
+            _CompactGrid(
+              itemCount: participants.length,
+              itemBuilder: (context, index) {
+                final participant = participants[index];
+                return _ParticipantCard(
+                  participant: participant,
+                  onScoreChanged: (value) =>
+                      _updateParticipantScore(participant, value),
+                  onRemove: () => _removeParticipant(participant),
+                );
+              },
+            ),
+          const SizedBox(height: 4),
+        ],
+      );
+    },
+  );
+}
+
+InputDecoration _inputDecoration(String label) => InputDecoration(
+  labelText: label,
+  isDense: true,
+  filled: true,
+  fillColor: Colors.white,
+  contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+  border: const OutlineInputBorder(),
+  enabledBorder: const OutlineInputBorder(
+    borderSide: BorderSide(color: Color(0xFFBDBDBD)),
+  ),
+  focusedBorder: const OutlineInputBorder(
+    borderSide: BorderSide(color: _focusedInputColor, width: 2),
+  ),
+);
+
+class _CompactGrid extends StatelessWidget {
+  const _CompactGrid({required this.itemCount, required this.itemBuilder});
+
+  final int itemCount;
+  final IndexedWidgetBuilder itemBuilder;
+
+  @override
+  Widget build(BuildContext context) => GridView.builder(
+    shrinkWrap: true,
+    physics: const NeverScrollableScrollPhysics(),
+    padding: EdgeInsets.zero,
+    itemCount: itemCount,
+    gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+      crossAxisCount: 2,
+      crossAxisSpacing: _gridGap,
+      mainAxisSpacing: _gridGap,
+      mainAxisExtent: _compactCardHeight,
+    ),
+    itemBuilder: itemBuilder,
+  );
+}
+
+class _GuestAddCard extends StatelessWidget {
+  const _GuestAddCard({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: const Key('guest-add-card'),
+    margin: EdgeInsets.zero,
+    child: InkWell(
+      borderRadius: BorderRadius.circular(12),
+      onTap: onTap,
+      child: const Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Text('게스트 추가'),
+          SizedBox(width: 4),
+          Icon(Icons.add, size: 19),
+        ],
+      ),
+    ),
+  );
+}
+
+class _UnselectedMemberCard extends StatelessWidget {
+  const _UnselectedMemberCard({required this.member, required this.onAdd});
+
+  final Member member;
+  final VoidCallback onAdd;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: ValueKey('unselected-card-${member.id}'),
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.only(left: 9),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              member.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+          const SizedBox(width: 3),
+          Text('${member.score}', style: const TextStyle(fontSize: 12)),
+          IconButton(
+            tooltip: '참가자에 추가',
+            onPressed: onAdd,
+            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+            padding: EdgeInsets.zero,
+            iconSize: 19,
+            icon: const Icon(Icons.add_circle_outline),
           ),
         ],
-        OutlinedButton.icon(
-          onPressed: _addTemporary,
-          icon: const Icon(Icons.person_add_alt),
-          label: const Text('임시 클럽원 추가'),
-        ),
-        const SizedBox(height: 12),
-        FilledButton.icon(
-          key: const Key('build-teams-button'),
-          onPressed: widget.controller.participants.isEmpty
-              ? null
-              : _buildTeams,
-          icon: const Icon(Icons.shuffle),
-          label: const Text('팀짜기'),
-        ),
-      ],
+      ),
+    ),
+  );
+}
+
+class _ParticipantCard extends StatelessWidget {
+  const _ParticipantCard({
+    required this.participant,
+    required this.onScoreChanged,
+    required this.onRemove,
+  });
+
+  final Participant participant;
+  final ValueChanged<String> onScoreChanged;
+  final VoidCallback onRemove;
+
+  @override
+  Widget build(BuildContext context) => Card(
+    key: ValueKey('participant-card-${participant.id}'),
+    margin: EdgeInsets.zero,
+    child: Padding(
+      padding: const EdgeInsets.only(left: 9),
+      child: Row(
+        children: [
+          Expanded(
+            child: Text(
+              participant.name,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 13),
+            ),
+          ),
+          const SizedBox(width: 3),
+          SizedBox(
+            width: 45,
+            height: 36,
+            child: TextFormField(
+              key: ValueKey('participant-score-${participant.id}'),
+              initialValue: '${participant.score}',
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: onScoreChanged,
+              textAlign: TextAlign.center,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.symmetric(
+                  horizontal: 4,
+                  vertical: 8,
+                ),
+                border: OutlineInputBorder(),
+              ),
+            ),
+          ),
+          IconButton(
+            tooltip: '참가자 제외',
+            onPressed: onRemove,
+            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
+            padding: EdgeInsets.zero,
+            iconSize: 19,
+            icon: const Icon(Icons.close),
+          ),
+        ],
+      ),
     ),
   );
 }
@@ -300,26 +450,54 @@ class _TemporaryMemberDialogState extends State<_TemporaryMemberDialog> {
 
   @override
   Widget build(BuildContext context) => AlertDialog(
-    title: const Text('임시 클럽원 추가'),
-    content: Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        TextField(
-          key: const Key('temporary-name-input'),
-          controller: _nameController,
-          decoration: InputDecoration(labelText: '이름', errorText: _nameError),
-        ),
-        TextField(
-          key: const Key('temporary-score-input'),
-          controller: _scoreController,
-          keyboardType: TextInputType.number,
-          inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-          decoration: InputDecoration(
-            labelText: '점수 (90~200)',
-            errorText: _scoreError,
+    title: const Text('게스트 추가'),
+    content: SizedBox(
+      width: 280,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          SizedBox(
+            height: _controlHeight,
+            child: TextField(
+              key: const Key('temporary-name-input'),
+              controller: _nameController,
+              decoration: _inputDecoration('이름'),
+            ),
           ),
-        ),
-      ],
+          if (_nameError != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              _nameError!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 12,
+              ),
+            ),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            height: _controlHeight,
+            child: TextField(
+              key: const Key('temporary-score-input'),
+              controller: _scoreController,
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              decoration: _inputDecoration('점수 (90~200)'),
+            ),
+          ),
+          if (_scoreError != null) ...[
+            const SizedBox(height: 4),
+            Text(
+              _scoreError!,
+              style: TextStyle(
+                color: Theme.of(context).colorScheme.error,
+                fontSize: 12,
+              ),
+            ),
+          ],
+        ],
+      ),
     ),
     actions: [
       TextButton(

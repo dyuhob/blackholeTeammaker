@@ -87,7 +87,17 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
     theme: ThemeData(
       useMaterial3: true,
       colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF3367D6)),
-      inputDecorationTheme: const InputDecorationTheme(filled: true),
+      inputDecorationTheme: const InputDecorationTheme(
+        filled: true,
+        fillColor: Colors.white,
+        border: OutlineInputBorder(),
+        enabledBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFFBDBDBD)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderSide: BorderSide(color: Color(0xFF42A5F5), width: 2),
+        ),
+      ),
     ),
     home: AppShell(
       memberController: _memberController,
