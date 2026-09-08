@@ -59,6 +59,28 @@ void main() {
     expect(controller.errorMessage, isNotNull);
   });
 
+  test('restores an unfinished roster and add-member inputs', () async {
+    final saved = Member(id: 'saved', name: '저장 회원', score: 180);
+    final unfinished = Member(id: 'draft', name: '저장 전 회원', score: 165);
+    final controller = MemberController(
+      repository: MemoryMemberRepository([saved]),
+      idFactory: () => 'unused',
+    );
+    await controller.initialize();
+
+    controller.restoreWorkspace(
+      draftMembers: [saved, unfinished],
+      pendingName: '입력 중',
+      pendingScore: '150',
+    );
+
+    expect(controller.savedMembers, [saved]);
+    expect(controller.draftMembers, [saved, unfinished]);
+    expect(controller.pendingName, '입력 중');
+    expect(controller.pendingScore, '150');
+    expect(controller.hasUnsavedChanges, isTrue);
+  });
+
   test('manually entered scores must be between 90 and 200', () async {
     final repository = MemoryMemberRepository([]);
     var nextId = 1;

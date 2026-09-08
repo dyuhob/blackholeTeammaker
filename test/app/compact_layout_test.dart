@@ -102,6 +102,7 @@ void main() {
       TeamMakerApp(
         memberRepository: members,
         historyRepository: MemoryHistoryRepository(),
+        workspaceRepository: MemoryWorkspaceRepository(),
         galleryExporter: MemoryGalleryExporter(),
         idFactory: SequenceIds().next,
         random: Random(31),
@@ -182,9 +183,8 @@ void main() {
     final panel = tester.widget<Container>(
       find.byKey(const Key('team-total-panel-1')),
     );
-    final decoration = panel.decoration! as BoxDecoration;
-    expect(decoration.color, const Color(0xFF1976D2));
-    expect(decoration.border!.top.color, const Color(0xFF1976D2));
+    expect(panel.color, const Color(0xFF1976D2));
+    expect(panel.decoration, isNull);
     expect(
       tester
           .widget<Text>(find.byKey(const Key('team-total-score-1')))

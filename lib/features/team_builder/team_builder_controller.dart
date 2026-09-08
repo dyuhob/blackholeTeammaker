@@ -19,6 +19,7 @@ class TeamBuilderController extends ChangeNotifier {
   List<Member> _savedMembers = [];
   final List<Participant> _participants = [];
   int _teamSize = 3;
+  String _teamSizeInput = '3';
   String _title = '';
   TeamResult? _currentResult;
   bool _isCurrentResultSaved = false;
@@ -35,6 +36,7 @@ class TeamBuilderController extends ChangeNotifier {
 
   List<Participant> get participants => List.unmodifiable(_participants);
   int get teamSize => _teamSize;
+  String get teamSizeInput => _teamSizeInput;
   String get title => _title;
   TeamResult? get currentResult => _currentResult;
   bool get isCurrentResultSaved => _isCurrentResultSaved;
@@ -42,6 +44,17 @@ class TeamBuilderController extends ChangeNotifier {
   set teamSize(int value) {
     if (value < 1 || value == _teamSize) return;
     _teamSize = value;
+    _teamSizeInput = '$value';
+    notifyListeners();
+  }
+
+  set teamSizeInput(String value) {
+    if (value == _teamSizeInput) return;
+    _teamSizeInput = value;
+    final parsed = int.tryParse(value);
+    if (parsed != null && parsed >= 1 && parsed <= 99) {
+      _teamSize = parsed;
+    }
     notifyListeners();
   }
 
@@ -115,6 +128,49 @@ class TeamBuilderController extends ChangeNotifier {
         type: ParticipantType.manualTemporary,
       ),
     );
+    _sortParticipants();
+    notifyListeners();
+  }
+
+  void restoreWorkspace({
+    required List<Participant> participants,
+    required String teamSizeInput,
+    required String title,
+  }) {
+    final savedById = {for (final member in _savedMembers) member.id: member};
+    _participants
+      ..clear()
+      ..addAll(
+        participants
+            .where((participant) {
+              if (participant.type == ParticipantType.autoTemporary) {
+                return false;
+              }
+              if (participant.type == ParticipantType.regular) {
+                return savedById.containsKey(participant.sourceMemberId);
+              }
+              return true;
+            })
+            .map((participant) {
+              if (participant.type != ParticipantType.regular) {
+                return participant;
+              }
+              final member = savedById[participant.sourceMemberId]!;
+              return Participant(
+                id: 'participant-${member.id}',
+                sourceMemberId: member.id,
+                name: member.name,
+                score: participant.score,
+                type: ParticipantType.regular,
+              );
+            }),
+      );
+    _teamSizeInput = teamSizeInput;
+    final parsedTeamSize = int.tryParse(teamSizeInput);
+    if (parsedTeamSize != null && parsedTeamSize >= 1 && parsedTeamSize <= 99) {
+      _teamSize = parsedTeamSize;
+    }
+    _title = title;
     _sortParticipants();
     notifyListeners();
   }

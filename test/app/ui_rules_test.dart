@@ -17,6 +17,7 @@ void main() {
       TeamMakerApp(
         memberRepository: MemoryMemberRepository(members),
         historyRepository: MemoryHistoryRepository(),
+        workspaceRepository: MemoryWorkspaceRepository(),
         galleryExporter: MemoryGalleryExporter(),
         idFactory: ids.next,
         random: Random(17),
@@ -118,6 +119,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('게스트 1 (자동)'), findsOneWidget);
-    expect(find.text('160'), findsOneWidget);
+    expect(find.text('게스트 2 (자동)'), findsOneWidget);
+    expect(find.text('게스트 3 (자동)'), findsOneWidget);
+    expect(find.text('160'), findsNWidgets(3));
   });
 }

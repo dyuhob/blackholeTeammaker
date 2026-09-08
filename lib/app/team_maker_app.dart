@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
@@ -5,8 +6,10 @@ import 'package:uuid/uuid.dart';
 
 import '../data/member_repository.dart';
 import '../data/team_history_repository.dart';
+import '../data/workspace_repository.dart';
 import '../domain/member.dart';
 import '../domain/team_allocator.dart';
+import '../domain/workspace_state.dart';
 import '../features/history/history_controller.dart';
 import '../features/members/member_controller.dart';
 import '../features/team_builder/team_builder_controller.dart';
@@ -18,6 +21,7 @@ class TeamMakerApp extends StatefulWidget {
     super.key,
     required this.memberRepository,
     required this.historyRepository,
+    required this.workspaceRepository,
     required this.galleryExporter,
     String Function()? idFactory,
     Random? random,
@@ -28,6 +32,7 @@ class TeamMakerApp extends StatefulWidget {
 
   final MemberRepository memberRepository;
   final TeamHistoryRepository historyRepository;
+  final WorkspaceRepository workspaceRepository;
   final GalleryExporter galleryExporter;
   final String Function() idFactory;
   final Random random;
@@ -42,6 +47,8 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
   late final TeamBuilderController _teamBuilderController;
   late final HistoryController _historyController;
   List<Member> _lastPublishedMembers = [];
+  var _selectedTabIndex = 0;
+  var _workspaceReady = false;
 
   @override
   void initState() {
@@ -49,7 +56,7 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
     _memberController = MemberController(
       repository: widget.memberRepository,
       idFactory: widget.idFactory,
-    )..addListener(_publishSavedMembers);
+    )..addListener(_memberChanged);
     _teamBuilderController = TeamBuilderController(
       allocator: TeamAllocator(
         random: widget.random,
@@ -57,20 +64,54 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
       ),
       idFactory: widget.idFactory,
       now: widget.now,
-    );
+    )..addListener(_persistWorkspace);
     _historyController = HistoryController(widget.historyRepository);
-    _memberController.initialize();
-    _historyController.initialize();
+    _initialize();
   }
 
   @override
   void dispose() {
     _memberController
-      ..removeListener(_publishSavedMembers)
+      ..removeListener(_memberChanged)
       ..dispose();
-    _teamBuilderController.dispose();
+    _teamBuilderController
+      ..removeListener(_persistWorkspace)
+      ..dispose();
     _historyController.dispose();
     super.dispose();
+  }
+
+  Future<void> _initialize() async {
+    await Future.wait([
+      _memberController.initialize(),
+      _historyController.initialize(),
+    ]);
+    try {
+      final workspace = await widget.workspaceRepository.load();
+      if (workspace != null) {
+        _memberController.restoreWorkspace(
+          draftMembers: workspace.draftMembers,
+          pendingName: workspace.pendingMemberName,
+          pendingScore: workspace.pendingMemberScore,
+        );
+        _teamBuilderController.restoreWorkspace(
+          participants: workspace.participants,
+          teamSizeInput: workspace.teamSizeInput,
+          title: workspace.title,
+        );
+        _selectedTabIndex = workspace.selectedTabIndex.clamp(0, 2);
+      }
+    } on Object {
+      // A damaged workspace draft must not prevent saved data from opening.
+    }
+    _workspaceReady = true;
+    _persistWorkspace();
+    if (mounted) setState(() {});
+  }
+
+  void _memberChanged() {
+    _publishSavedMembers();
+    _persistWorkspace();
   }
 
   void _publishSavedMembers() {
@@ -78,6 +119,26 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
     if (_membersEqual(_lastPublishedMembers, current)) return;
     _lastPublishedMembers = [...current];
     _teamBuilderController.setSavedMembers(current);
+  }
+
+  void _selectTab(int index) {
+    if (_selectedTabIndex == index) return;
+    setState(() => _selectedTabIndex = index);
+    _persistWorkspace();
+  }
+
+  void _persistWorkspace() {
+    if (!_workspaceReady) return;
+    final state = WorkspaceState(
+      selectedTabIndex: _selectedTabIndex,
+      draftMembers: _memberController.draftMembers,
+      pendingMemberName: _memberController.pendingName,
+      pendingMemberScore: _memberController.pendingScore,
+      participants: _teamBuilderController.participants,
+      teamSizeInput: _teamBuilderController.teamSizeInput,
+      title: _teamBuilderController.title,
+    );
+    unawaited(widget.workspaceRepository.save(state).catchError((_) {}));
   }
 
   @override
@@ -99,12 +160,16 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
         ),
       ),
     ),
-    home: AppShell(
-      memberController: _memberController,
-      teamBuilderController: _teamBuilderController,
-      historyController: _historyController,
-      galleryExporter: widget.galleryExporter,
-    ),
+    home: _workspaceReady
+        ? AppShell(
+            selectedIndex: _selectedTabIndex,
+            onDestinationSelected: _selectTab,
+            memberController: _memberController,
+            teamBuilderController: _teamBuilderController,
+            historyController: _historyController,
+            galleryExporter: widget.galleryExporter,
+          )
+        : const Scaffold(body: Center(child: CircularProgressIndicator())),
   );
 }
 

@@ -40,7 +40,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     super.initState();
     _titleController = TextEditingController(text: widget.controller.title);
     _teamSizeController = TextEditingController(
-      text: '${widget.controller.teamSize}',
+      text: widget.controller.teamSizeInput,
     );
   }
 
@@ -137,7 +137,9 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
           SizedBox(
             height: _controlHeight,
             child: TextField(
+              key: const Key('team-title-input'),
               controller: _titleController,
+              onChanged: (value) => widget.controller.title = value,
               decoration: _inputDecoration('팀 편성 이름'),
             ),
           ),
@@ -153,6 +155,8 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     child: TextField(
                       key: const Key('team-size-input'),
                       controller: _teamSizeController,
+                      onChanged: (value) =>
+                          widget.controller.teamSizeInput = value,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: _inputDecoration('팀당 인원수'),

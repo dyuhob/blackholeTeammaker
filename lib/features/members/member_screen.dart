@@ -17,9 +17,20 @@ class MemberScreen extends StatefulWidget {
 }
 
 class _MemberScreenState extends State<MemberScreen> {
-  final _nameController = TextEditingController();
-  final _scoreController = TextEditingController();
+  late final TextEditingController _nameController;
+  late final TextEditingController _scoreController;
   final _invalidScoreMemberIds = <String>{};
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController(
+      text: widget.controller.pendingName,
+    );
+    _scoreController = TextEditingController(
+      text: widget.controller.pendingScore,
+    );
+  }
 
   @override
   void dispose() {
@@ -37,6 +48,7 @@ class _MemberScreenState extends State<MemberScreen> {
       return;
     }
     widget.controller.addMember(_nameController.text, score);
+    widget.controller.clearPendingMember();
     _nameController.clear();
     _scoreController.clear();
   }
@@ -81,6 +93,8 @@ class _MemberScreenState extends State<MemberScreen> {
                     child: TextField(
                       key: const Key('member-name-input'),
                       controller: _nameController,
+                      onChanged: (value) =>
+                          widget.controller.pendingName = value,
                       textInputAction: TextInputAction.next,
                       decoration: _inputDecoration('클럽원 이름'),
                     ),
@@ -91,6 +105,8 @@ class _MemberScreenState extends State<MemberScreen> {
                     child: TextField(
                       key: const Key('member-score-input'),
                       controller: _scoreController,
+                      onChanged: (value) =>
+                          widget.controller.pendingScore = value,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted: (_) => _addMember(),

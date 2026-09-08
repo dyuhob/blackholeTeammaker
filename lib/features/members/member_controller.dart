@@ -11,6 +11,8 @@ class MemberController extends ChangeNotifier {
   final String Function() _idFactory;
   List<Member> _savedMembers = [];
   List<Member> _draftMembers = [];
+  String _pendingName = '';
+  String _pendingScore = '';
   bool _isLoading = false;
   bool _isSaving = false;
   String? _errorMessage;
@@ -21,6 +23,20 @@ class MemberController extends ChangeNotifier {
   bool get isSaving => _isSaving;
   String? get errorMessage => _errorMessage;
   bool get hasUnsavedChanges => !_membersEqual(_savedMembers, _draftMembers);
+  String get pendingName => _pendingName;
+  String get pendingScore => _pendingScore;
+
+  set pendingName(String value) {
+    if (value == _pendingName) return;
+    _pendingName = value;
+    notifyListeners();
+  }
+
+  set pendingScore(String value) {
+    if (value == _pendingScore) return;
+    _pendingScore = value;
+    notifyListeners();
+  }
 
   Future<void> initialize() async {
     _isLoading = true;
@@ -42,6 +58,24 @@ class MemberController extends ChangeNotifier {
     validateManualScore(score);
     _draftMembers.add(Member(id: _idFactory(), name: name, score: score));
     _errorMessage = null;
+    notifyListeners();
+  }
+
+  void clearPendingMember() {
+    if (_pendingName.isEmpty && _pendingScore.isEmpty) return;
+    _pendingName = '';
+    _pendingScore = '';
+    notifyListeners();
+  }
+
+  void restoreWorkspace({
+    required List<Member> draftMembers,
+    required String pendingName,
+    required String pendingScore,
+  }) {
+    _draftMembers = [...draftMembers];
+    _pendingName = pendingName;
+    _pendingScore = pendingScore;
     notifyListeners();
   }
 

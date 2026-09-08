@@ -103,4 +103,36 @@ void main() {
     expect(controller.currentResult, result);
     expect(controller.isCurrentResultSaved, isFalse);
   });
+
+  test('restores exclusions guests edited scores and form inputs', () {
+    controller.restoreWorkspace(
+      participants: [
+        Participant(
+          id: 'participant-1',
+          sourceMemberId: '1',
+          name: '김회원',
+          score: 195,
+          type: ParticipantType.regular,
+        ),
+        Participant(
+          id: 'guest-1',
+          name: '게스트',
+          score: 150,
+          type: ParticipantType.manualTemporary,
+        ),
+      ],
+      teamSizeInput: '4',
+      title: '저녁 경기',
+    );
+
+    expect(controller.participants.map((value) => value.id), [
+      'participant-1',
+      'guest-1',
+    ]);
+    expect(controller.participants.first.score, 195);
+    expect(controller.availableMembers.map((value) => value.id), ['2', '3']);
+    expect(controller.teamSizeInput, '4');
+    expect(controller.teamSize, 4);
+    expect(controller.title, '저녁 경기');
+  });
 }

@@ -18,6 +18,7 @@ void main() {
       TeamMakerApp(
         memberRepository: members,
         historyRepository: history,
+        workspaceRepository: MemoryWorkspaceRepository(),
         galleryExporter: MemoryGalleryExporter(),
         idFactory: ids.next,
         random: Random(3),
@@ -61,6 +62,7 @@ void main() {
       TeamMakerApp(
         memberRepository: members,
         historyRepository: history,
+        workspaceRepository: MemoryWorkspaceRepository(),
         galleryExporter: MemoryGalleryExporter(),
         idFactory: ids.next,
         random: Random(5),
@@ -88,5 +90,100 @@ void main() {
     await tester.tap(find.text('기록'));
     await tester.pumpAndSettle();
     expect(find.text('2026-09-07 20:30 팀 편성'), findsOneWidget);
+  });
+
+  testWidgets('unfinished inputs and team selection survive an app restart', (
+    tester,
+  ) async {
+    final members = MemoryMemberRepository([
+      Member(id: 'member-1', name: '기존 클럽원', score: 180),
+    ]);
+    final history = MemoryHistoryRepository();
+    final workspace = MemoryWorkspaceRepository();
+    final ids = SequenceIds();
+
+    Widget buildApp() => TeamMakerApp(
+      memberRepository: members,
+      historyRepository: history,
+      workspaceRepository: workspace,
+      galleryExporter: MemoryGalleryExporter(),
+      idFactory: ids.next,
+      random: Random(7),
+      now: () => DateTime(2026, 9, 8, 20),
+    );
+
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('member-name-input')),
+      '저장 전 클럽원',
+    );
+    await tester.enterText(find.byKey(const Key('member-score-input')), '165');
+    await tester.tap(find.widgetWithText(FilledButton, '추가'));
+    await tester.pump();
+    await tester.enterText(
+      find.byKey(const Key('member-name-input')),
+      '입력 중 이름',
+    );
+    await tester.enterText(find.byKey(const Key('member-score-input')), '155');
+
+    await tester.tap(find.text('팀짜기').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('team-title-input')), '화요일 경기');
+    await tester.enterText(find.byKey(const Key('team-size-input')), '4');
+    await tester.tap(find.byTooltip('참가자 제외'));
+    await tester.tap(find.byKey(const Key('guest-add-card')));
+    await tester.pumpAndSettle();
+    await tester.enterText(
+      find.byKey(const Key('temporary-name-input')),
+      '입력 게스트',
+    );
+    await tester.enterText(
+      find.byKey(const Key('temporary-score-input')),
+      '150',
+    );
+    await tester.tap(find.byKey(const Key('add-temporary-button')));
+    await tester.pumpAndSettle();
+
+    await tester.pumpWidget(const SizedBox.shrink());
+    await tester.pumpAndSettle();
+    await tester.pumpWidget(buildApp());
+    await tester.pumpAndSettle();
+
+    expect(find.byKey(const Key('team-title-input')), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('team-title-input')))
+          .controller
+          ?.text,
+      '화요일 경기',
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('team-size-input')))
+          .controller
+          ?.text,
+      '4',
+    );
+    expect(find.text('입력 게스트'), findsOneWidget);
+    expect(find.text('기존 클럽원'), findsOneWidget);
+
+    await tester.tap(find.text('클럽원 관리'));
+    await tester.pumpAndSettle();
+    expect(find.text('저장 전 클럽원'), findsOneWidget);
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('member-name-input')))
+          .controller
+          ?.text,
+      '입력 중 이름',
+    );
+    expect(
+      tester
+          .widget<TextField>(find.byKey(const Key('member-score-input')))
+          .controller
+          ?.text,
+      '155',
+    );
   });
 }

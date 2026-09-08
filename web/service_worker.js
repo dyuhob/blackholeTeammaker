@@ -1,4 +1,4 @@
-const CACHE_NAME = 'team-maker-v2';
+const CACHE_NAME = 'team-maker-v3';
 const CORE_ASSETS = [
   '/',
   '/index.html',

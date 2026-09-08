@@ -1,8 +1,10 @@
 import 'package:flutter/widgets.dart';
 import 'package:team_maker/data/member_repository.dart';
 import 'package:team_maker/data/team_history_repository.dart';
+import 'package:team_maker/data/workspace_repository.dart';
 import 'package:team_maker/domain/member.dart';
 import 'package:team_maker/domain/team_result.dart';
+import 'package:team_maker/domain/workspace_state.dart';
 import 'package:team_maker/services/gallery_exporter.dart';
 
 class MemoryMemberRepository implements MemberRepository {
@@ -39,6 +41,18 @@ class MemoryHistoryRepository implements TeamHistoryRepository {
   @override
   Future<void> delete(String resultId) async {
     values.removeWhere((value) => value.id == resultId);
+  }
+}
+
+class MemoryWorkspaceRepository implements WorkspaceRepository {
+  WorkspaceState? value;
+
+  @override
+  Future<WorkspaceState?> load() async => value;
+
+  @override
+  Future<void> save(WorkspaceState state) async {
+    value = state;
   }
 }
 
