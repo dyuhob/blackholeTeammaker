@@ -32,12 +32,23 @@ void main() {
 
   test('web entrypoint loads Flutter and registers the service worker', () {
     final index = File('web/index.html').readAsStringSync();
+    final bootstrap = File('web/flutter_bootstrap.js').readAsStringSync();
 
     expect(index, contains('<html lang="ko">'));
+    expect(
+      index,
+      contains(
+        'name="viewport" content="width=device-width, initial-scale=1.0"',
+      ),
+    );
     expect(index, contains('href="manifest.json"'));
     expect(index, contains('src="flutter_bootstrap.js"'));
     expect(index, contains("register('/service_worker.js')"));
     expect(index, isNot(contains('flutter_service_worker_version')));
+    expect(bootstrap, contains('{{flutter_js}}'));
+    expect(bootstrap, contains('{{flutter_build_config}}'));
+    expect(bootstrap, contains('_flutter.loader.load();'));
+    expect(bootstrap, isNot(contains('serviceWorkerSettings')));
   });
 
   test(

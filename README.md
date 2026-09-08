@@ -17,7 +17,7 @@ Android에서 실행하려면 연결된 기기나 에뮬레이터를 선택해 `
 flutter analyze
 flutter test
 dart test -p chrome test/web/browser_json_object_store_test.dart
-flutter build web --release --no-web-resources-cdn
+flutter build web --release --no-web-resources-cdn --pwa-strategy=none
 flutter build apk --release
 ```
 

@@ -36,7 +36,10 @@ void main() {
     );
     expect(
       workflow,
-      contains('flutter build web --release --no-web-resources-cdn'),
+      contains(
+        'flutter build web --release --no-web-resources-cdn '
+        '--pwa-strategy=none',
+      ),
     );
     expect(workflow, contains('.vercel/output/static'));
     expect(workflow, contains('"version": 3'));
