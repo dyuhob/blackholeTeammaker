@@ -90,41 +90,54 @@ class _TeamCard extends StatelessWidget {
         Container(
           key: ValueKey('team-total-panel-${team.number}'),
           width: double.infinity,
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
-          ),
-          child: Row(
+          color: Colors.white,
+          child: Column(
             children: [
-              const Expanded(
-                child: Text(
-                  '총점',
-                  style: TextStyle(
-                    color: Color(0xFF1976D2),
-                    fontWeight: FontWeight.bold,
-                  ),
+              const Divider(
+                height: 1,
+                thickness: 1,
+                indent: 16,
+                endIndent: 16,
+                color: Colors.black,
+              ),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
+                child: Row(
+                  children: [
+                    const Expanded(
+                      child: Text(
+                        '총점',
+                        style: TextStyle(
+                          color: Colors.black,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Text(
+                      '${team.rawScore}',
+                      key: ValueKey('team-total-score-${team.number}'),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    if (team.bonusScore > 0) ...[
+                      const SizedBox(width: 16),
+                      Text(
+                        '+${team.bonusScore}',
+                        key: ValueKey('team-bonus-score-${team.number}'),
+                        style: const TextStyle(
+                          color: Color(0xFF1976D2),
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ),
-              Text(
-                '${team.rawScore}',
-                key: ValueKey('team-total-score-${team.number}'),
-                style: const TextStyle(
-                  color: Color(0xFF1976D2),
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              if (team.bonusScore > 0) ...[
-                const SizedBox(width: 16),
-                Text(
-                  '+${team.bonusScore}',
-                  key: ValueKey('team-bonus-score-${team.number}'),
-                  style: const TextStyle(
-                    color: Color(0xFF2E7D32),
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
             ],
           ),
         ),

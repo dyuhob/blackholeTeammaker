@@ -13,6 +13,7 @@ abstract final class NavigationIconAssets {
   static const participantRemove = 'assets/navigation/x-outline-96x96.png';
   static const participantAdd = 'assets/navigation/add-outline-96x96.png';
   static const gallerySave = 'assets/navigation/image-down-outline-96x96.png';
+  static const share = 'assets/navigation/share-outline-96x96.png';
   static const recordSave = 'assets/navigation/floppy2-outline-96x96.png';
 }
 

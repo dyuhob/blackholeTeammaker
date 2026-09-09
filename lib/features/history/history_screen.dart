@@ -47,7 +47,7 @@ class HistoryScreen extends StatelessWidget {
               title: Text(
                 result.title,
                 style: const TextStyle(
-                  color: Color(0xFF6B7280),
+                  color: Color(0xFF1976D2),
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -55,6 +55,7 @@ class HistoryScreen extends StatelessWidget {
               subtitle: Text(
                 '팀당 ${result.teamSize}명 · ${result.teams.length}팀 · '
                 '${formatDateTime(result.createdAt)}',
+                style: const TextStyle(color: Color(0xFF6B7280)),
               ),
               onTap: () => Navigator.push(
                 context,

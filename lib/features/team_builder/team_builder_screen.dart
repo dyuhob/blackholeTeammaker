@@ -14,8 +14,8 @@ const _controlHeight = 48.0;
 const _compactCardHeight = 52.0;
 const _gridGap = 6.0;
 const _focusedInputColor = Color(0xFF42A5F5);
-const _actionButtonSize = 48.0;
-const _actionIconSize = 28.5;
+const _actionButtonSize = 36.0;
+const _actionIconSize = 20.0;
 
 class TeamBuilderScreen extends StatefulWidget {
   const TeamBuilderScreen({
@@ -194,11 +194,16 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const Spacer(),
-                TextButton(
+                OutlinedButton(
                   onPressed: () {
                     _invalidScoreParticipantIds.clear();
                     widget.controller.resetAllMembers();
                   },
+                  style: OutlinedButton.styleFrom(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                  ),
                   child: const Text('전체 추가'),
                 ),
               ],
@@ -348,11 +353,12 @@ class _UnselectedMemberCard extends StatelessWidget {
               member.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13),
+              style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold),
             ),
           ),
           const SizedBox(width: 3),
           Text('${member.score}', style: const TextStyle(fontSize: 12)),
+          const SizedBox(width: 6),
           BorderedAssetIconButton(
             tooltip: '참가자에 추가',
             onPressed: onAdd,
@@ -394,7 +400,11 @@ class _ParticipantCard extends StatelessWidget {
               participant.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: Colors.black),
+              style: const TextStyle(
+                fontSize: 13,
+                color: Colors.black,
+                fontWeight: FontWeight.bold,
+              ),
             ),
           ),
           const SizedBox(width: 3),
@@ -421,6 +431,7 @@ class _ParticipantCard extends StatelessWidget {
               ),
             ),
           ),
+          const SizedBox(width: 6),
           BorderedAssetIconButton(
             tooltip: '참가자 제외',
             onPressed: onRemove,

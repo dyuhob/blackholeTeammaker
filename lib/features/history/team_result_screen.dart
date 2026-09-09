@@ -129,12 +129,10 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
         _savedTitle = title;
       });
       widget.onSaved?.call(updated);
-      await widget.galleryExporter.save(context, updated);
-      if (!mounted) return;
       await widget.galleryExporter.share(context, updated);
-      if (mounted) _showMessage('저장 후 공유했습니다.');
+      if (mounted) _showMessage('공유했습니다.');
     } catch (error) {
-      if (mounted) _showMessage('저장 후 공유하지 못했습니다: $error');
+      if (mounted) _showMessage('공유하지 못했습니다: $error');
     } finally {
       if (savedLocally) await widget.onHistoryChanged?.call();
       if (mounted) setState(() => _sharing = false);
@@ -206,9 +204,11 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
           child: Row(
             children: [
               Expanded(
-                child: OutlinedButton.icon(
+                child: FilledButton.icon(
                   onPressed: _exporting || _sharing ? null : _saveGallery,
-                  style: OutlinedButton.styleFrom(
+                  style: FilledButton.styleFrom(
+                    backgroundColor: const Color(0xFF1976D2),
+                    foregroundColor: Colors.white,
                     minimumSize: const Size(0, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     textStyle: const TextStyle(fontSize: 12),
@@ -226,15 +226,22 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: FilledButton(
+                child: OutlinedButton.icon(
                   key: const Key('save-and-share-button'),
                   onPressed: _exporting || _sharing ? null : _saveAndShare,
-                  style: FilledButton.styleFrom(
+                  style: OutlinedButton.styleFrom(
+                    backgroundColor: Colors.white,
+                    foregroundColor: const Color(0xFF1976D2),
+                    side: const BorderSide(color: Color(0xFF1976D2)),
                     minimumSize: const Size(0, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     textStyle: const TextStyle(fontSize: 12),
                   ),
-                  child: Text(_sharing ? '공유 준비 중…' : '저장 후 공유'),
+                  icon: const ImageIcon(
+                    AssetImage(NavigationIconAssets.share),
+                    size: 20,
+                  ),
+                  label: Text(_sharing ? '공유 준비 중…' : '공유'),
                 ),
               ),
               const SizedBox(width: 8),

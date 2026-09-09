@@ -10,7 +10,7 @@ class GalleryExportService implements GalleryExporter {
   const GalleryExportService();
 
   @override
-  String get actionLabel => '갤러리에 저장';
+  String get actionLabel => '갤러리 저장';
 
   @override
   String get busyLabel => '이미지 생성 중…';

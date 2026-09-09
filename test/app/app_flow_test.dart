@@ -92,7 +92,9 @@ void main() {
     expect(find.text('2026-09-07 20:30 팀 편성'), findsOneWidget);
   });
 
-  testWidgets('team result offers a save and share action', (tester) async {
+  testWidgets('share saves history without saving another gallery copy', (
+    tester,
+  ) async {
     final members = MemoryMemberRepository([
       Member(id: 'member-1', name: '공유 회원', score: 165),
     ]);
@@ -117,12 +119,12 @@ void main() {
     await tester.tap(find.byKey(const Key('build-teams-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('저장 후 공유'), findsOneWidget);
+    expect(find.text('공유'), findsOneWidget);
     await tester.tap(find.byKey(const Key('save-and-share-button')));
     await tester.pumpAndSettle();
 
     expect(history.values, hasLength(1));
-    expect(gallery.saved, hasLength(1));
+    expect(gallery.saved, isEmpty);
     expect(gallery.shared, hasLength(1));
   });
 

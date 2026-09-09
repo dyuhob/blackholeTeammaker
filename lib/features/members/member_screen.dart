@@ -125,7 +125,7 @@ class _MemberScreenState extends State<MemberScreen> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted: (_) => _addMember(),
-                      decoration: _inputDecoration('에버리지'),
+                      decoration: _inputDecoration('점수'),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -144,7 +144,7 @@ class _MemberScreenState extends State<MemberScreen> {
               ),
             Expanded(
               child: widget.controller.draftMembers.isEmpty
-                  ? const Center(child: Text('클럽원 이름과 에버리지를 추가해 주세요.'))
+                  ? const Center(child: Text('클럽원 이름과 점수를 추가해 주세요.'))
                   : ListView.separated(
                       itemCount: widget.controller.draftMembers.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 4),
@@ -164,11 +164,22 @@ class _MemberScreenState extends State<MemberScreen> {
                               padding: const EdgeInsets.fromLTRB(12, 4, 2, 4),
                               child: Row(
                                 children: [
-                                  Expanded(child: Text(member.name)),
+                                  Expanded(
+                                    child: Text(
+                                      member.name,
+                                      style: const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
                                   Text(
                                     '에버리지',
                                     key: ValueKey(
                                       'member-score-label-${member.id}',
+                                    ),
+                                    style: const TextStyle(
+                                      color: Color(0xFF6B7280),
+                                      fontSize: 12,
                                     ),
                                   ),
                                   const SizedBox(width: 8),
@@ -230,6 +241,7 @@ class _MemberScreenState extends State<MemberScreen> {
                                       ),
                                     ),
                                   ),
+                                  const SizedBox(width: 6),
                                   BorderedAssetIconButton(
                                     tooltip: '클럽원 삭제',
                                     onPressed: () {

@@ -12,7 +12,7 @@ class WebGalleryExportService implements GalleryExporter {
   const WebGalleryExportService();
 
   @override
-  String get actionLabel => '이미지 다운로드';
+  String get actionLabel => '갤러리 저장';
 
   @override
   String get busyLabel => '다운로드 준비 중…';

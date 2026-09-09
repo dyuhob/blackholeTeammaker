@@ -183,26 +183,30 @@ void main() {
     final panel = tester.widget<Container>(
       find.byKey(const Key('team-total-panel-1')),
     );
-    expect(panel.color, isNull);
-    final decoration = panel.decoration! as BoxDecoration;
-    expect(decoration.color, Colors.white);
-    expect(
-      decoration.border,
-      const Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+    expect(panel.color, Colors.white);
+    expect(panel.decoration, isNull);
+    final divider = tester.widget<Divider>(
+      find.descendant(
+        of: find.byKey(const Key('team-total-panel-1')),
+        matching: find.byType(Divider),
+      ),
     );
+    expect(divider.indent, 16);
+    expect(divider.endIndent, 16);
+    expect(divider.color, Colors.black);
     expect(
       tester
           .widget<Text>(find.byKey(const Key('team-total-score-1')))
           .style
           ?.color,
-      const Color(0xFF1976D2),
+      Colors.black,
     );
     expect(
       tester
           .widget<Text>(find.byKey(const Key('team-bonus-score-1')))
           .style
           ?.color,
-      const Color(0xFF2E7D32),
+      const Color(0xFF1976D2),
     );
   });
 }
