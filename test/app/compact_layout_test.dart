@@ -151,7 +151,7 @@ void main() {
     }
   });
 
-  testWidgets('team total uses blue panel with green bonus score', (
+  testWidgets('team total uses a top divider and colored score labels', (
     tester,
   ) async {
     final result = TeamResult(
@@ -183,21 +183,26 @@ void main() {
     final panel = tester.widget<Container>(
       find.byKey(const Key('team-total-panel-1')),
     );
-    expect(panel.color, const Color(0xFF1976D2));
-    expect(panel.decoration, isNull);
+    expect(panel.color, isNull);
+    final decoration = panel.decoration! as BoxDecoration;
+    expect(decoration.color, Colors.white);
+    expect(
+      decoration.border,
+      const Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+    );
     expect(
       tester
           .widget<Text>(find.byKey(const Key('team-total-score-1')))
           .style
           ?.color,
-      Colors.white,
+      const Color(0xFF1976D2),
     );
     expect(
       tester
           .widget<Text>(find.byKey(const Key('team-bonus-score-1')))
           .style
           ?.color,
-      const Color(0xFF69F0AE),
+      const Color(0xFF2E7D32),
     );
   });
 }

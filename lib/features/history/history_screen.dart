@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/navigation_icon_assets.dart';
 import '../../services/gallery_exporter.dart';
 import 'history_controller.dart';
 import 'team_result_content.dart';
@@ -10,10 +11,12 @@ class HistoryScreen extends StatelessWidget {
     super.key,
     required this.controller,
     required this.galleryExporter,
+    this.onHistoryChanged,
   });
 
   final HistoryController controller;
   final GalleryExporter galleryExporter;
+  final Future<void> Function()? onHistoryChanged;
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(
@@ -32,10 +35,26 @@ class HistoryScreen extends StatelessWidget {
         itemBuilder: (context, index) {
           final result = controller.results[index];
           return Card(
+            margin: EdgeInsets.zero,
+            elevation: 0,
+            color: Colors.white,
+            surfaceTintColor: Colors.transparent,
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(12),
+            ),
             child: ListTile(
-              title: Text(result.title),
+              contentPadding: const EdgeInsets.only(left: 16, right: 8),
+              title: Text(
+                result.title,
+                style: const TextStyle(
+                  color: Color(0xFF6B7280),
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
               subtitle: Text(
-                '${formatDateTime(result.createdAt)} · ${result.teams.length}팀 · 팀당 ${result.teamSize}명',
+                '팀당 ${result.teamSize}명 · ${result.teams.length}팀 · '
+                '${formatDateTime(result.createdAt)}',
               ),
               onTap: () => Navigator.push(
                 context,
@@ -45,13 +64,14 @@ class HistoryScreen extends StatelessWidget {
                     historyController: controller,
                     galleryExporter: galleryExporter,
                     initiallySaved: true,
+                    onHistoryChanged: onHistoryChanged,
                   ),
                 ),
               ),
-              trailing: IconButton(
+              trailing: BorderedAssetIconButton(
                 tooltip: '기록 삭제',
-                icon: const Icon(Icons.delete_outline),
                 onPressed: () => _confirmDelete(context, result.id),
+                assetPath: NavigationIconAssets.memberDelete,
               ),
             ),
           );
@@ -80,6 +100,7 @@ class HistoryScreen extends StatelessWidget {
     );
     if (confirmed != true) return;
     final deleted = await controller.deleteResult(resultId);
+    if (deleted) await onHistoryChanged?.call();
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(deleted ? '기록을 삭제했습니다.' : '기록을 삭제하지 못했습니다.')),

@@ -6,6 +6,7 @@ import 'package:web/web.dart' as web;
 import '../domain/team_result.dart';
 import 'gallery_exporter.dart';
 import 'team_result_image_renderer.dart';
+import 'team_result_share.dart';
 
 class WebGalleryExportService implements GalleryExporter {
   const WebGalleryExportService();
@@ -42,4 +43,8 @@ class WebGalleryExportService implements GalleryExporter {
       web.URL.revokeObjectURL(objectUrl);
     }
   }
+
+  @override
+  Future<void> share(BuildContext context, TeamResult result) =>
+      shareTeamResultImage(context, result);
 }

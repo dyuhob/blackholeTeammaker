@@ -72,12 +72,36 @@ void main() {
     expect(automaticParticipants, hasLength(1));
     expect(automaticParticipants.single.name, '게스트 1 (자동)');
     expect(automaticParticipants.single.score, 160);
+    expect(teams.map((team) => team.number), [1, 2, 3]);
+    expect(
+      teams.first.rawScore,
+      teams.map((team) => team.rawScore).reduce(max),
+    );
     for (final team in teams) {
-      final types = team.participants.map((participant) => participant.type);
-      expect(
-        types,
-        orderedEquals([...types]..sort((a, b) => a.order - b.order)),
+      final automaticStart = team.participants.indexWhere(
+        (participant) => participant.type == ParticipantType.autoTemporary,
       );
+      final scoredParticipants = automaticStart == -1
+          ? team.participants
+          : team.participants.sublist(0, automaticStart);
+      expect(
+        scoredParticipants.map((participant) => participant.score),
+        orderedEquals(
+          scoredParticipants.map((participant) => participant.score).toList()
+            ..sort((left, right) => right.compareTo(left)),
+        ),
+      );
+      if (automaticStart != -1) {
+        expect(
+          team.participants
+              .sublist(automaticStart)
+              .every(
+                (participant) =>
+                    participant.type == ParticipantType.autoTemporary,
+              ),
+          isTrue,
+        );
+      }
     }
   });
 

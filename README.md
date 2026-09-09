@@ -21,6 +21,40 @@ flutter build web --release --no-web-resources-cdn --pwa-strategy=none
 flutter build apk --release
 ```
 
+## Supabase sync setup
+
+Run `supabase/migrations/20260909000000_shared_club_sync.sql` in the
+Supabase SQL Editor. Then copy `config/supabase.example.json` to
+`config/supabase.local.json` and replace the example project URL and
+publishable key.
+
+```powershell
+flutter run -d chrome --dart-define-from-file=config/supabase.local.json
+flutter build web --release --no-web-resources-cdn --pwa-strategy=none --dart-define-from-file=config/supabase.local.json
+flutter build apk --release --dart-define-from-file=config/supabase.local.json
+```
+
+The local configuration file is ignored by Git. For Vercel deployment, add
+`SUPABASE_URL` and `SUPABASE_PUBLISHABLE_KEY` as GitHub repository secrets.
+Never put a Supabase secret or service-role key in a Flutter build.
+
+## Supabase synchronization
+
+Apply `supabase/migrations/20260909000000_shared_club_sync.sql` in the
+Supabase SQL Editor. Copy `config/supabase.example.json` to
+`config/supabase.local.json`, then fill in the project URL and publishable key.
+The local configuration file is ignored by Git.
+
+```powershell
+flutter run -d chrome --dart-define-from-file=config/supabase.local.json
+flutter build web --release --no-web-resources-cdn --pwa-strategy=none --dart-define-from-file=config/supabase.local.json
+flutter build apk --release --dart-define-from-file=config/supabase.local.json
+```
+
+For GitHub Actions deployment, add repository secrets named `SUPABASE_URL`
+and `SUPABASE_PUBLISHABLE_KEY`. Never use a secret or service-role key in the
+Flutter build.
+
 Web 결과물은 `build/web`, Android APK는 `build/app/outputs/flutter-apk/app-release.apk`에 생성됩니다.
 
 ## 데이터 저장

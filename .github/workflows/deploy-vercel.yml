@@ -44,7 +44,13 @@ jobs:
         run: dart test -p chrome test/web/browser_json_object_store_test.dart
 
       - name: Build Web release
-        run: flutter build web --release --no-web-resources-cdn --pwa-strategy=none
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY }}
+        run: >-
+          flutter build web --release --no-web-resources-cdn --pwa-strategy=none
+          --dart-define=SUPABASE_URL="$SUPABASE_URL"
+          --dart-define=SUPABASE_PUBLISHABLE_KEY="$SUPABASE_PUBLISHABLE_KEY"
 
       - name: Prepare Vercel Build Output
         shell: bash

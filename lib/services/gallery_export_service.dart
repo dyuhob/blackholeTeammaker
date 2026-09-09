@@ -4,6 +4,7 @@ import 'package:gal/gal.dart';
 import '../domain/team_result.dart';
 import 'gallery_exporter.dart';
 import 'team_result_image_renderer.dart';
+import 'team_result_share.dart';
 
 class GalleryExportService implements GalleryExporter {
   const GalleryExportService();
@@ -29,4 +30,8 @@ class GalleryExportService implements GalleryExporter {
       name: teamResultImageName(result),
     );
   }
+
+  @override
+  Future<void> share(BuildContext context, TeamResult result) =>
+      shareTeamResultImage(context, result);
 }

@@ -16,6 +16,7 @@ class MemberController extends ChangeNotifier {
   bool _isLoading = false;
   bool _isSaving = false;
   String? _errorMessage;
+  int _inputRevision = 0;
 
   List<Member> get savedMembers => List.unmodifiable(_savedMembers);
   List<Member> get draftMembers => List.unmodifiable(_draftMembers);
@@ -25,6 +26,7 @@ class MemberController extends ChangeNotifier {
   bool get hasUnsavedChanges => !_membersEqual(_savedMembers, _draftMembers);
   String get pendingName => _pendingName;
   String get pendingScore => _pendingScore;
+  int get inputRevision => _inputRevision;
 
   set pendingName(String value) {
     if (value == _pendingName) return;
@@ -44,8 +46,9 @@ class MemberController extends ChangeNotifier {
     notifyListeners();
     try {
       final loaded = await _repository.loadAll();
-      _savedMembers = [...loaded];
-      _draftMembers = [...loaded];
+      final sorted = _sortedMembers(loaded);
+      _savedMembers = [...sorted];
+      _draftMembers = [...sorted];
     } catch (error) {
       _errorMessage = '클럽원 명단을 불러오지 못했습니다: $error';
     } finally {
@@ -54,9 +57,21 @@ class MemberController extends ChangeNotifier {
     }
   }
 
+  Future<void> reloadFromLocal() async {
+    final loaded = _sortedMembers(await _repository.loadAll());
+    _savedMembers = [...loaded];
+    _draftMembers = [...loaded];
+    _pendingName = '';
+    _pendingScore = '';
+    _inputRevision++;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   void addMember(String name, int score) {
     validateManualScore(score);
     _draftMembers.add(Member(id: _idFactory(), name: name, score: score));
+    _draftMembers.sort(_compareMembersByName);
     _errorMessage = null;
     notifyListeners();
   }
@@ -73,7 +88,7 @@ class MemberController extends ChangeNotifier {
     required String pendingName,
     required String pendingScore,
   }) {
-    _draftMembers = [...draftMembers];
+    _draftMembers = _sortedMembers(draftMembers);
     _pendingName = pendingName;
     _pendingScore = pendingScore;
     notifyListeners();
@@ -93,7 +108,7 @@ class MemberController extends ChangeNotifier {
   }
 
   Future<bool> save() async {
-    if (!hasUnsavedChanges || _isSaving) return true;
+    if (_isSaving) return false;
     _isSaving = true;
     _errorMessage = null;
     notifyListeners();
@@ -110,6 +125,12 @@ class MemberController extends ChangeNotifier {
     }
   }
 }
+
+List<Member> _sortedMembers(Iterable<Member> members) =>
+    [...members]..sort(_compareMembersByName);
+
+int _compareMembersByName(Member left, Member right) =>
+    left.name.compareTo(right.name);
 
 bool _membersEqual(List<Member> left, List<Member> right) {
   if (left.length != right.length) return false;

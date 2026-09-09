@@ -18,6 +18,8 @@ class AppShell extends StatelessWidget {
     required this.teamBuilderController,
     required this.historyController,
     required this.galleryExporter,
+    required this.onMemberSaved,
+    required this.onHistoryChanged,
   });
 
   final int selectedIndex;
@@ -26,65 +28,81 @@ class AppShell extends StatelessWidget {
   final TeamBuilderController teamBuilderController;
   final HistoryController historyController;
   final GalleryExporter galleryExporter;
+  final Future<void> Function() onMemberSaved;
+  final Future<void> Function() onHistoryChanged;
 
   static const _titles = ['클럽원 관리', '팀짜기', '기록'];
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(_titles[selectedIndex])),
+    appBar: AppBar(
+      title: Text(_titles[selectedIndex]),
+      shape: const Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+    ),
     body: IndexedStack(
       index: selectedIndex,
       children: [
-        MemberScreen(controller: memberController),
+        MemberScreen(controller: memberController, onSaved: onMemberSaved),
         TeamBuilderScreen(
           controller: teamBuilderController,
           historyController: historyController,
           galleryExporter: galleryExporter,
+          onHistoryChanged: onHistoryChanged,
         ),
         HistoryScreen(
           controller: historyController,
           galleryExporter: galleryExporter,
+          onHistoryChanged: onHistoryChanged,
         ),
       ],
     ),
-    bottomNavigationBar: NavigationBar(
-      selectedIndex: selectedIndex,
-      onDestinationSelected: onDestinationSelected,
-      destinations: const [
-        NavigationDestination(
-          icon: NavigationTabIcon(
-            assetPath: NavigationIconAssets.membersOutline,
-            fallback: Icons.people_outline,
+    bottomNavigationBar: DecoratedBox(
+      decoration: const BoxDecoration(
+        color: Colors.white,
+        border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+      ),
+      child: NavigationBar(
+        backgroundColor: Colors.white,
+        indicatorColor: Colors.transparent,
+        elevation: 0,
+        selectedIndex: selectedIndex,
+        onDestinationSelected: onDestinationSelected,
+        destinations: const [
+          NavigationDestination(
+            icon: NavigationTabIcon(
+              assetPath: NavigationIconAssets.membersOutline,
+              fallback: Icons.people_outline,
+            ),
+            selectedIcon: NavigationTabIcon(
+              assetPath: NavigationIconAssets.membersFilled,
+              fallback: Icons.people,
+            ),
+            label: '클럽원 관리',
           ),
-          selectedIcon: NavigationTabIcon(
-            assetPath: NavigationIconAssets.membersFilled,
-            fallback: Icons.people,
+          NavigationDestination(
+            icon: NavigationTabIcon(
+              assetPath: NavigationIconAssets.teamsOutline,
+              fallback: Icons.shuffle_outlined,
+            ),
+            selectedIcon: NavigationTabIcon(
+              assetPath: NavigationIconAssets.teamsFilled,
+              fallback: Icons.shuffle,
+            ),
+            label: '팀짜기',
           ),
-          label: '클럽원 관리',
-        ),
-        NavigationDestination(
-          icon: NavigationTabIcon(
-            assetPath: NavigationIconAssets.teamsOutline,
-            fallback: Icons.shuffle_outlined,
+          NavigationDestination(
+            icon: NavigationTabIcon(
+              assetPath: NavigationIconAssets.historyOutline,
+              fallback: Icons.history_outlined,
+            ),
+            selectedIcon: NavigationTabIcon(
+              assetPath: NavigationIconAssets.historyFilled,
+              fallback: Icons.history,
+            ),
+            label: '기록',
           ),
-          selectedIcon: NavigationTabIcon(
-            assetPath: NavigationIconAssets.teamsFilled,
-            fallback: Icons.shuffle,
-          ),
-          label: '팀짜기',
-        ),
-        NavigationDestination(
-          icon: NavigationTabIcon(
-            assetPath: NavigationIconAssets.historyOutline,
-            fallback: Icons.history_outlined,
-          ),
-          selectedIcon: NavigationTabIcon(
-            assetPath: NavigationIconAssets.historyFilled,
-            fallback: Icons.history,
-          ),
-          label: '기록',
-        ),
-      ],
+        ],
+      ),
     ),
   );
 }

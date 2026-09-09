@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../app/navigation_icon_assets.dart';
 import '../../domain/team_result.dart';
 import '../../services/gallery_exporter.dart';
 import 'history_controller.dart';
@@ -13,6 +14,7 @@ class TeamResultScreen extends StatefulWidget {
     required this.galleryExporter,
     required this.initiallySaved,
     this.onSaved,
+    this.onHistoryChanged,
   });
 
   final TeamResult result;
@@ -20,6 +22,7 @@ class TeamResultScreen extends StatefulWidget {
   final GalleryExporter galleryExporter;
   final bool initiallySaved;
   final ValueChanged<TeamResult>? onSaved;
+  final Future<void> Function()? onHistoryChanged;
 
   @override
   State<TeamResultScreen> createState() => _TeamResultScreenState();
@@ -31,6 +34,7 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
   late bool _saved;
   late String _savedTitle;
   bool _exporting = false;
+  bool _sharing = false;
 
   bool get _hasSavedTitle =>
       _saved && _titleController.text.trim() == _savedTitle;
@@ -69,6 +73,8 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
         _savedTitle = title;
       });
       widget.onSaved?.call(updated);
+      await widget.onHistoryChanged?.call();
+      if (!mounted) return;
       _showMessage('기록에 저장했습니다.');
     } else if (mounted) {
       _showMessage(widget.historyController.errorMessage ?? '저장하지 못했습니다.');
@@ -92,6 +98,46 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
       }
     } finally {
       if (mounted) setState(() => _exporting = false);
+    }
+  }
+
+  Future<void> _saveAndShare() async {
+    if (_exporting || _sharing) return;
+    final title = _titleController.text.trim();
+    if (title.isEmpty) {
+      _showMessage('제목을 입력해 주세요.');
+      return;
+    }
+    setState(() => _sharing = true);
+    final updated = _result.copyWith(title: title);
+    var savedLocally = false;
+    try {
+      final saved = await widget.historyController.saveResult(updated);
+      if (!saved) {
+        if (mounted) {
+          _showMessage(
+            widget.historyController.errorMessage ?? '기록을 저장하지 못했습니다.',
+          );
+        }
+        return;
+      }
+      savedLocally = true;
+      if (!mounted) return;
+      setState(() {
+        _result = updated;
+        _saved = true;
+        _savedTitle = title;
+      });
+      widget.onSaved?.call(updated);
+      await widget.galleryExporter.save(context, updated);
+      if (!mounted) return;
+      await widget.galleryExporter.share(context, updated);
+      if (mounted) _showMessage('저장 후 공유했습니다.');
+    } catch (error) {
+      if (mounted) _showMessage('저장 후 공유하지 못했습니다: $error');
+    } finally {
+      if (savedLocally) await widget.onHistoryChanged?.call();
+      if (mounted) setState(() => _sharing = false);
     }
   }
 
@@ -128,14 +174,17 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
       if (!didPop && !_saved) _requestDiscard();
     },
     child: Scaffold(
-      appBar: AppBar(title: const Text('팀 편성 결과')),
+      appBar: AppBar(
+        title: const Text('팀 편성 결과'),
+        shape: const Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
           TextField(
             controller: _titleController,
             decoration: const InputDecoration(
-              labelText: '편성 제목',
+              labelText: '팀 편성 이름',
               border: OutlineInputBorder(),
             ),
           ),
@@ -147,33 +196,70 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
           TeamResultContent(result: _result),
         ],
       ),
-      bottomNavigationBar: SafeArea(
-        minimum: const EdgeInsets.all(16),
-        child: Row(
-          children: [
-            Expanded(
-              child: OutlinedButton.icon(
-                onPressed: _exporting ? null : _saveGallery,
-                icon: const Icon(Icons.image_outlined),
-                label: Text(
-                  _exporting
-                      ? widget.galleryExporter.busyLabel
-                      : widget.galleryExporter.actionLabel,
+      bottomNavigationBar: DecoratedBox(
+        decoration: const BoxDecoration(
+          color: Colors.white,
+          border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+        ),
+        child: SafeArea(
+          minimum: const EdgeInsets.all(16),
+          child: Row(
+            children: [
+              Expanded(
+                child: OutlinedButton.icon(
+                  onPressed: _exporting || _sharing ? null : _saveGallery,
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                  icon: const ImageIcon(
+                    AssetImage(NavigationIconAssets.gallerySave),
+                    size: 20,
+                  ),
+                  label: Text(
+                    _exporting
+                        ? widget.galleryExporter.busyLabel
+                        : widget.galleryExporter.actionLabel,
+                  ),
                 ),
               ),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: FilledButton.icon(
-                key: const Key('save-result-button'),
-                onPressed: _hasSavedTitle ? null : _saveResult,
-                icon: Icon(_hasSavedTitle ? Icons.check : Icons.save_outlined),
-                label: Text(
-                  _hasSavedTitle ? '저장됨' : (_saved ? '변경사항 저장' : '기록 저장'),
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton(
+                  key: const Key('save-and-share-button'),
+                  onPressed: _exporting || _sharing ? null : _saveAndShare,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                  child: Text(_sharing ? '공유 준비 중…' : '저장 후 공유'),
                 ),
               ),
-            ),
-          ],
+              const SizedBox(width: 8),
+              Expanded(
+                child: FilledButton.icon(
+                  key: const Key('save-result-button'),
+                  onPressed: _hasSavedTitle || _exporting || _sharing
+                      ? null
+                      : _saveResult,
+                  style: FilledButton.styleFrom(
+                    minimumSize: const Size(0, 48),
+                    padding: const EdgeInsets.symmetric(horizontal: 6),
+                    textStyle: const TextStyle(fontSize: 12),
+                  ),
+                  icon: const ImageIcon(
+                    AssetImage(NavigationIconAssets.recordSave),
+                    size: 20,
+                  ),
+                  label: Text(
+                    _hasSavedTitle ? '저장됨' : (_saved ? '변경사항 저장' : '기록 저장'),
+                  ),
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     ),

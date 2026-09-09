@@ -26,19 +26,24 @@ void main() {
 
       await repository.saveAll(members);
 
-      expect(store.value, {
-        'schemaVersion': 1,
-        'members': [
-          {'id': '1', 'name': '김회원', 'score': 180},
-        ],
-      });
+      expect(store.value?['schemaVersion'], 2);
+      expect(store.value?['members'], [
+        {'id': '1', 'name': '김회원', 'score': 180},
+      ]);
+      final pending = store.value?['pendingMutations']! as List<Object?>;
+      expect(pending, hasLength(1));
+      expect(pending.single, isA<Map<String, Object?>>());
+      expect(
+        pending.single as Map<String, Object?>,
+        containsPair('entityId', '1'),
+      );
       expect(await repository.loadAll(), members);
     },
   );
 
   test('member repository rejects unsupported schemas', () async {
     final repository = JsonMemberRepository(
-      MemoryJsonObjectStore({'schemaVersion': 2, 'members': <Object>[]}),
+      MemoryJsonObjectStore({'schemaVersion': 99, 'members': <Object>[]}),
     );
 
     expect(repository.loadAll, throwsFormatException);
@@ -62,12 +67,12 @@ void main() {
 
     await repository.delete('new');
     expect((await repository.loadAll()).map((value) => value.id), ['old']);
-    expect(store.value?['schemaVersion'], 1);
+    expect(store.value?['schemaVersion'], 2);
   });
 
   test('history repository rejects unsupported schemas', () async {
     final repository = JsonTeamHistoryRepository(
-      MemoryJsonObjectStore({'schemaVersion': 2, 'records': <Object>[]}),
+      MemoryJsonObjectStore({'schemaVersion': 99, 'records': <Object>[]}),
     );
 
     expect(repository.loadAll, throwsFormatException);

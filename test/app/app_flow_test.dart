@@ -92,6 +92,40 @@ void main() {
     expect(find.text('2026-09-07 20:30 팀 편성'), findsOneWidget);
   });
 
+  testWidgets('team result offers a save and share action', (tester) async {
+    final members = MemoryMemberRepository([
+      Member(id: 'member-1', name: '공유 회원', score: 165),
+    ]);
+    final history = MemoryHistoryRepository();
+    final gallery = MemoryGalleryExporter();
+    await tester.pumpWidget(
+      TeamMakerApp(
+        memberRepository: members,
+        historyRepository: history,
+        workspaceRepository: MemoryWorkspaceRepository(),
+        galleryExporter: gallery,
+        idFactory: SequenceIds().next,
+        random: Random(9),
+        now: () => DateTime(2026, 9, 9, 20, 30),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('팀짜기').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('team-size-input')), '1');
+    await tester.tap(find.byKey(const Key('build-teams-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('저장 후 공유'), findsOneWidget);
+    await tester.tap(find.byKey(const Key('save-and-share-button')));
+    await tester.pumpAndSettle();
+
+    expect(history.values, hasLength(1));
+    expect(gallery.saved, hasLength(1));
+    expect(gallery.shared, hasLength(1));
+  });
+
   testWidgets('unfinished inputs and team selection survive an app restart', (
     tester,
   ) async {

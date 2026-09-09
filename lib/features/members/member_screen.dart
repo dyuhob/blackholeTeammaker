@@ -9,9 +9,10 @@ const _controlHeight = 48.0;
 const _memberCardHeight = 48.0;
 
 class MemberScreen extends StatefulWidget {
-  const MemberScreen({super.key, required this.controller});
+  const MemberScreen({super.key, required this.controller, this.onSaved});
 
   final MemberController controller;
+  final Future<void> Function()? onSaved;
 
   @override
   State<MemberScreen> createState() => _MemberScreenState();
@@ -21,6 +22,7 @@ class _MemberScreenState extends State<MemberScreen> {
   late final TextEditingController _nameController;
   late final TextEditingController _scoreController;
   final _invalidScoreMemberIds = <String>{};
+  late int _inputRevision;
 
   @override
   void initState() {
@@ -31,10 +33,20 @@ class _MemberScreenState extends State<MemberScreen> {
     _scoreController = TextEditingController(
       text: widget.controller.pendingScore,
     );
+    _inputRevision = widget.controller.inputRevision;
+    widget.controller.addListener(_syncPendingInputs);
+  }
+
+  void _syncPendingInputs() {
+    if (_inputRevision == widget.controller.inputRevision) return;
+    _inputRevision = widget.controller.inputRevision;
+    _nameController.text = widget.controller.pendingName;
+    _scoreController.text = widget.controller.pendingScore;
   }
 
   @override
   void dispose() {
+    widget.controller.removeListener(_syncPendingInputs);
     _nameController.dispose();
     _scoreController.dispose();
     super.dispose();
@@ -60,6 +72,8 @@ class _MemberScreenState extends State<MemberScreen> {
       return;
     }
     final saved = await widget.controller.save();
+    if (!mounted) return;
+    if (saved) await widget.onSaved?.call();
     if (!mounted) return;
     _showMessage(
       saved
@@ -111,7 +125,7 @@ class _MemberScreenState extends State<MemberScreen> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted: (_) => _addMember(),
-                      decoration: _inputDecoration('점수'),
+                      decoration: _inputDecoration('에버리지'),
                     ),
                   ),
                   const SizedBox(width: 8),
@@ -130,7 +144,7 @@ class _MemberScreenState extends State<MemberScreen> {
               ),
             Expanded(
               child: widget.controller.draftMembers.isEmpty
-                  ? const Center(child: Text('클럽원 이름과 점수를 추가해 주세요.'))
+                  ? const Center(child: Text('클럽원 이름과 에버리지를 추가해 주세요.'))
                   : ListView.separated(
                       itemCount: widget.controller.draftMembers.length,
                       separatorBuilder: (_, _) => const SizedBox(height: 4),
@@ -140,13 +154,19 @@ class _MemberScreenState extends State<MemberScreen> {
                           height: _memberCardHeight,
                           child: Card(
                             margin: EdgeInsets.zero,
+                            elevation: 0,
+                            color: Colors.white,
+                            surfaceTintColor: Colors.transparent,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(12),
+                            ),
                             child: Padding(
                               padding: const EdgeInsets.fromLTRB(12, 4, 2, 4),
                               child: Row(
                                 children: [
                                   Expanded(child: Text(member.name)),
                                   Text(
-                                    '점수',
+                                    '에버리지',
                                     key: ValueKey(
                                       'member-score-label-${member.id}',
                                     ),
@@ -210,23 +230,14 @@ class _MemberScreenState extends State<MemberScreen> {
                                       ),
                                     ),
                                   ),
-                                  IconButton(
+                                  BorderedAssetIconButton(
                                     tooltip: '클럽원 삭제',
                                     onPressed: () {
                                       _invalidScoreMemberIds.remove(member.id);
                                       widget.controller.deleteMember(member.id);
                                     },
-                                    constraints: const BoxConstraints.tightFor(
-                                      width: 36,
-                                      height: 36,
-                                    ),
-                                    padding: EdgeInsets.zero,
-                                    iconSize: 20,
-                                    icon: const ImageIcon(
-                                      AssetImage(
+                                    assetPath:
                                         NavigationIconAssets.memberDelete,
-                                      ),
-                                    ),
                                   ),
                                 ],
                               ),
@@ -239,8 +250,9 @@ class _MemberScreenState extends State<MemberScreen> {
             FilledButton(
               key: const Key('save-members-button'),
               onPressed:
-                  widget.controller.hasUnsavedChanges &&
-                      !widget.controller.isSaving
+                  !widget.controller.isSaving &&
+                      (widget.controller.hasUnsavedChanges ||
+                          widget.controller.draftMembers.isNotEmpty)
                   ? _save
                   : null,
               child: Text(widget.controller.isSaving ? '저장 중…' : '저장'),

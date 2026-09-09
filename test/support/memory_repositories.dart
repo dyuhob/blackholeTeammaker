@@ -77,10 +77,16 @@ class MemoryGalleryExporter implements GalleryExporter {
   final String failureMessage;
 
   final List<TeamResult> saved = [];
+  final List<TeamResult> shared = [];
 
   @override
   Future<void> save(BuildContext context, TeamResult result) async {
     saved.add(result);
+  }
+
+  @override
+  Future<void> share(BuildContext context, TeamResult result) async {
+    shared.add(result);
   }
 }
 

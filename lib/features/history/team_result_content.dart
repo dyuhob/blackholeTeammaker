@@ -55,6 +55,10 @@ class _TeamCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) => Card(
     margin: const EdgeInsets.only(bottom: 12),
+    elevation: 0,
+    color: Colors.white,
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     clipBehavior: Clip.antiAlias,
     child: Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -87,14 +91,17 @@ class _TeamCard extends StatelessWidget {
           key: ValueKey('team-total-panel-${team.number}'),
           width: double.infinity,
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-          color: const Color(0xFF1976D2),
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+          ),
           child: Row(
             children: [
               const Expanded(
                 child: Text(
                   '총점',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Color(0xFF1976D2),
                     fontWeight: FontWeight.bold,
                   ),
                 ),
@@ -103,7 +110,7 @@ class _TeamCard extends StatelessWidget {
                 '${team.rawScore}',
                 key: ValueKey('team-total-score-${team.number}'),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Color(0xFF1976D2),
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -113,7 +120,7 @@ class _TeamCard extends StatelessWidget {
                   '+${team.bonusScore}',
                   key: ValueKey('team-bonus-score-${team.number}'),
                   style: const TextStyle(
-                    color: Color(0xFF69F0AE),
+                    color: Color(0xFF2E7D32),
                     fontWeight: FontWeight.bold,
                   ),
                 ),

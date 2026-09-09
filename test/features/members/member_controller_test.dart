@@ -4,6 +4,70 @@ import 'package:team_maker/domain/member.dart';
 import 'package:team_maker/features/members/member_controller.dart';
 
 void main() {
+  test(
+    'loaded roster is name-sorted without creating unsaved changes',
+    () async {
+      final controller = MemberController(
+        repository: MemoryMemberRepository([
+          Member(id: '3', name: '이회원', score: 170),
+          Member(id: '1', name: '김회원', score: 180),
+          Member(id: '2', name: '박회원', score: 160),
+        ]),
+        idFactory: () => 'unused',
+      );
+
+      await controller.initialize();
+
+      expect(controller.draftMembers.map((member) => member.name), [
+        '김회원',
+        '박회원',
+        '이회원',
+      ]);
+      expect(controller.hasUnsavedChanges, isFalse);
+    },
+  );
+
+  test('new members are inserted in ascending name order', () async {
+    final controller = MemberController(
+      repository: MemoryMemberRepository([
+        Member(id: '2', name: '이회원', score: 170),
+        Member(id: '1', name: '김회원', score: 180),
+      ]),
+      idFactory: () => 'new',
+    );
+    await controller.initialize();
+
+    controller.addMember('박회원', 160);
+
+    expect(controller.draftMembers.map((member) => member.name), [
+      '김회원',
+      '박회원',
+      '이회원',
+    ]);
+  });
+
+  test('restored unfinished roster is name-sorted', () async {
+    final controller = MemberController(
+      repository: MemoryMemberRepository([]),
+      idFactory: () => 'unused',
+    );
+    await controller.initialize();
+
+    controller.restoreWorkspace(
+      draftMembers: [
+        Member(id: '2', name: '최회원', score: 170),
+        Member(id: '1', name: '김회원', score: 180),
+      ],
+      pendingName: '',
+      pendingScore: '',
+    );
+
+    expect(controller.draftMembers.map((member) => member.name), [
+      '김회원',
+      '최회원',
+    ]);
+  });
+
   test('draft additions do not change the saved roster before save', () async {
     final repository = MemoryMemberRepository([
       Member(id: '1', name: '김회원', score: 180),
@@ -75,7 +139,7 @@ void main() {
     );
 
     expect(controller.savedMembers, [saved]);
-    expect(controller.draftMembers, [saved, unfinished]);
+    expect(controller.draftMembers, [unfinished, saved]);
     expect(controller.pendingName, '입력 중');
     expect(controller.pendingScore, '150');
     expect(controller.hasUnsavedChanges, isTrue);
@@ -95,13 +159,36 @@ void main() {
 
     controller.addMember('최솟값', 90);
     controller.addMember('최댓값', 200);
-    expect(controller.draftMembers.map((member) => member.score), [90, 200]);
-
     expect(
-      () => controller.updateScore(controller.draftMembers.first.id, 201),
-      throwsArgumentError,
+      controller.draftMembers.map((member) => member.score),
+      unorderedEquals([90, 200]),
     );
-    expect(controller.draftMembers.first.score, 90);
+
+    final minimum = controller.draftMembers.firstWhere(
+      (member) => member.score == 90,
+    );
+    expect(() => controller.updateScore(minimum.id, 201), throwsArgumentError);
+    expect(
+      controller.draftMembers
+          .firstWhere((member) => member.id == minimum.id)
+          .score,
+      90,
+    );
+  });
+
+  test('save persists even when the visible roster is unchanged', () async {
+    final repository = MemoryMemberRepository([
+      Member(id: 'saved', name: '기존 회원', score: 180),
+    ]);
+    final controller = MemberController(
+      repository: repository,
+      idFactory: () => 'unused',
+    );
+    await controller.initialize();
+
+    expect(await controller.save(), isTrue);
+
+    expect(repository.writeCount, 1);
   });
 }
 
@@ -110,6 +197,7 @@ class MemoryMemberRepository implements MemberRepository {
 
   List<Member> members;
   bool failWrites = false;
+  int writeCount = 0;
 
   @override
   Future<List<Member>> loadAll() async => [...members];
@@ -117,6 +205,7 @@ class MemoryMemberRepository implements MemberRepository {
   @override
   Future<void> saveAll(List<Member> members) async {
     if (failWrites) throw const FileSystemException('write failed');
+    writeCount++;
     this.members = [...members];
   }
 }

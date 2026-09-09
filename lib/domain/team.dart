@@ -14,8 +14,12 @@ class Team {
   int get rawScore => participants.fold(0, (sum, member) => sum + member.score);
   int get effectiveScore => rawScore + bonusScore;
 
-  Team copyWith({List<Participant>? participants, int? bonusScore}) => Team(
-    number: number,
+  Team copyWith({
+    int? number,
+    List<Participant>? participants,
+    int? bonusScore,
+  }) => Team(
+    number: number ?? this.number,
     participants: participants ?? this.participants,
     bonusScore: bonusScore ?? this.bonusScore,
   );

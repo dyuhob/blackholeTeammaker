@@ -84,10 +84,10 @@ class TeamAllocator {
 
     final teams = List.generate(teamCount, (index) {
       final participants = teamMembers[index]
-        ..sort((left, right) => left.type.order - right.type.order);
+        ..sort(_compareParticipantsForDisplay);
       return Team(number: index + 1, participants: participants);
     });
-    return compensateScores(teams);
+    return _orderTeamsForDisplay(compensateScores(teams));
   }
 
   List<Team> compensateScores(List<Team> teams) {
@@ -101,6 +101,30 @@ class TeamAllocator {
         )
         .toList();
   }
+
+  List<Team> _orderTeamsForDisplay(List<Team> teams) {
+    if (teams.isEmpty) return const [];
+    final shuffled = [...teams]..shuffle(_random);
+    final highestScore = shuffled.map((team) => team.rawScore).reduce(max);
+    final highestIndex = shuffled.indexWhere(
+      (team) => team.rawScore == highestScore,
+    );
+    final highest = shuffled.removeAt(highestIndex);
+    final ordered = [highest, ...shuffled];
+    return [
+      for (var index = 0; index < ordered.length; index++)
+        ordered[index].copyWith(number: index + 1),
+    ];
+  }
+}
+
+int _compareParticipantsForDisplay(Participant left, Participant right) {
+  final leftIsAutomatic = left.type == ParticipantType.autoTemporary;
+  final rightIsAutomatic = right.type == ParticipantType.autoTemporary;
+  if (leftIsAutomatic != rightIsAutomatic) return leftIsAutomatic ? 1 : -1;
+  final scoreOrder = right.score.compareTo(left.score);
+  if (scoreOrder != 0) return scoreOrder;
+  return left.name.compareTo(right.name);
 }
 
 class _Slot {

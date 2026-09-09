@@ -32,6 +32,13 @@ class HistoryController extends ChangeNotifier {
     }
   }
 
+  Future<void> reloadFromLocal() async {
+    _results = await _repository.loadAll();
+    _sort();
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   Future<bool> saveResult(TeamResult result) async {
     if (_isSaving) return false;
     _isSaving = true;

@@ -14,6 +14,8 @@ const _controlHeight = 48.0;
 const _compactCardHeight = 52.0;
 const _gridGap = 6.0;
 const _focusedInputColor = Color(0xFF42A5F5);
+const _actionButtonSize = 48.0;
+const _actionIconSize = 28.5;
 
 class TeamBuilderScreen extends StatefulWidget {
   const TeamBuilderScreen({
@@ -21,11 +23,13 @@ class TeamBuilderScreen extends StatefulWidget {
     required this.controller,
     required this.historyController,
     required this.galleryExporter,
+    this.onHistoryChanged,
   });
 
   final TeamBuilderController controller;
   final HistoryController historyController;
   final GalleryExporter galleryExporter;
+  final Future<void> Function()? onHistoryChanged;
 
   @override
   State<TeamBuilderScreen> createState() => _TeamBuilderScreenState();
@@ -87,6 +91,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             historyController: widget.historyController,
             galleryExporter: widget.galleryExporter,
             initiallySaved: false,
+            onHistoryChanged: widget.onHistoryChanged,
             onSaved: (saved) =>
                 widget.controller.updateCurrentResult(saved, saved: true),
           ),
@@ -295,15 +300,25 @@ class _GuestAddCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     key: const Key('guest-add-card'),
     margin: EdgeInsets.zero,
+    elevation: 0,
+    color: Colors.white,
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     child: InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
-      child: const Row(
+      child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text('게스트 추가'),
-          SizedBox(width: 4),
-          ImageIcon(AssetImage(NavigationIconAssets.participantAdd), size: 19),
+          const Text('게스트 추가', style: TextStyle(color: Colors.black)),
+          const SizedBox(width: 6),
+          BorderedAssetIconButton(
+            assetPath: NavigationIconAssets.participantAdd,
+            tooltip: '게스트 추가',
+            onPressed: onTap,
+            size: _actionButtonSize,
+            iconSize: _actionIconSize,
+          ),
         ],
       ),
     ),
@@ -320,6 +335,10 @@ class _UnselectedMemberCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     key: ValueKey('unselected-card-${member.id}'),
     margin: EdgeInsets.zero,
+    elevation: 0,
+    color: Colors.white,
+    surfaceTintColor: Colors.transparent,
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     child: Padding(
       padding: const EdgeInsets.only(left: 9),
       child: Row(
@@ -334,15 +353,12 @@ class _UnselectedMemberCard extends StatelessWidget {
           ),
           const SizedBox(width: 3),
           Text('${member.score}', style: const TextStyle(fontSize: 12)),
-          IconButton(
+          BorderedAssetIconButton(
             tooltip: '참가자에 추가',
             onPressed: onAdd,
-            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-            padding: EdgeInsets.zero,
-            iconSize: 19,
-            icon: const ImageIcon(
-              AssetImage(NavigationIconAssets.participantAdd),
-            ),
+            assetPath: NavigationIconAssets.participantAdd,
+            size: _actionButtonSize,
+            iconSize: _actionIconSize,
           ),
         ],
       ),
@@ -365,12 +381,10 @@ class _ParticipantCard extends StatelessWidget {
   Widget build(BuildContext context) => Card(
     key: ValueKey('participant-card-${participant.id}'),
     margin: EdgeInsets.zero,
+    elevation: 0,
     color: Colors.white,
     surfaceTintColor: Colors.transparent,
-    shape: RoundedRectangleBorder(
-      side: const BorderSide(color: _focusedInputColor),
-      borderRadius: BorderRadius.circular(12),
-    ),
+    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     child: Padding(
       padding: const EdgeInsets.only(left: 9),
       child: Row(
@@ -380,7 +394,7 @@ class _ParticipantCard extends StatelessWidget {
               participant.name,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 13, color: _focusedInputColor),
+              style: const TextStyle(fontSize: 13, color: Colors.black),
             ),
           ),
           const SizedBox(width: 3),
@@ -407,16 +421,12 @@ class _ParticipantCard extends StatelessWidget {
               ),
             ),
           ),
-          IconButton(
+          BorderedAssetIconButton(
             tooltip: '참가자 제외',
             onPressed: onRemove,
-            constraints: const BoxConstraints.tightFor(width: 32, height: 32),
-            padding: EdgeInsets.zero,
-            iconSize: 19,
-            color: _focusedInputColor,
-            icon: const ImageIcon(
-              AssetImage(NavigationIconAssets.participantRemove),
-            ),
+            assetPath: NavigationIconAssets.participantRemove,
+            size: _actionButtonSize,
+            iconSize: _actionIconSize,
           ),
         ],
       ),
