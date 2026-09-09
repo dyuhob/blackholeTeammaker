@@ -37,7 +37,13 @@ class AppShell extends StatelessWidget {
   Widget build(BuildContext context) => Scaffold(
     appBar: AppBar(
       title: Text(_titles[selectedIndex]),
-      shape: const Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      shape: Border(
+        bottom: BorderSide(
+          color: selectedIndex == 0
+              ? const Color(0xFFF3F4F6)
+              : const Color(0xFFE5E7EB),
+        ),
+      ),
     ),
     body: IndexedStack(
       index: selectedIndex,

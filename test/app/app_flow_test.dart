@@ -119,6 +119,29 @@ void main() {
     await tester.tap(find.byKey(const Key('build-teams-button')));
     await tester.pumpAndSettle();
 
+    expect(find.text('팀당 1명 · 2팀 · 2026-09-09 20:30'), findsOneWidget);
+    final primaryColor = Theme.of(
+      tester.element(find.byKey(const Key('save-result-button'))),
+    ).colorScheme.primary;
+    final galleryButton = tester.widget<FilledButton>(
+      find.widgetWithText(FilledButton, '갤러리에 저장'),
+    );
+    expect(
+      galleryButton.style?.backgroundColor?.resolve(<WidgetState>{}),
+      primaryColor,
+    );
+    final shareButton = tester.widget<OutlinedButton>(
+      find.byKey(const Key('save-and-share-button')),
+    );
+    expect(
+      shareButton.style?.foregroundColor?.resolve(<WidgetState>{}),
+      primaryColor,
+    );
+    expect(
+      shareButton.style?.side?.resolve(<WidgetState>{})?.color,
+      primaryColor,
+    );
+
     expect(find.text('공유'), findsOneWidget);
     await tester.tap(find.byKey(const Key('save-and-share-button')));
     await tester.pumpAndSettle();

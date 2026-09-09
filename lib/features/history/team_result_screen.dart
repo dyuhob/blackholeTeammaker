@@ -188,7 +188,8 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
           ),
           const SizedBox(height: 8),
           Text(
-            '${formatDateTime(_result.createdAt)} · ${_result.teams.length}팀 · 팀당 ${_result.teamSize}명',
+            '팀당 ${_result.teamSize}명 · ${_result.teams.length}팀 · '
+            '${formatDateTime(_result.createdAt)}',
           ),
           const SizedBox(height: 16),
           TeamResultContent(result: _result),
@@ -207,11 +208,13 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
                 child: FilledButton.icon(
                   onPressed: _exporting || _sharing ? null : _saveGallery,
                   style: FilledButton.styleFrom(
-                    backgroundColor: const Color(0xFF1976D2),
+                    backgroundColor: Theme.of(context).colorScheme.primary,
                     foregroundColor: Colors.white,
                     minimumSize: const Size(0, 48),
+                    maximumSize: const Size(double.infinity, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     textStyle: const TextStyle(fontSize: 12),
+                    alignment: Alignment.center,
                   ),
                   icon: const ImageIcon(
                     AssetImage(NavigationIconAssets.gallerySave),
@@ -231,11 +234,15 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
                   onPressed: _exporting || _sharing ? null : _saveAndShare,
                   style: OutlinedButton.styleFrom(
                     backgroundColor: Colors.white,
-                    foregroundColor: const Color(0xFF1976D2),
-                    side: const BorderSide(color: Color(0xFF1976D2)),
+                    foregroundColor: Theme.of(context).colorScheme.primary,
+                    side: BorderSide(
+                      color: Theme.of(context).colorScheme.primary,
+                    ),
                     minimumSize: const Size(0, 48),
+                    maximumSize: const Size(double.infinity, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     textStyle: const TextStyle(fontSize: 12),
+                    alignment: Alignment.center,
                   ),
                   icon: const ImageIcon(
                     AssetImage(NavigationIconAssets.share),
@@ -253,8 +260,10 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
                       : _saveResult,
                   style: FilledButton.styleFrom(
                     minimumSize: const Size(0, 48),
+                    maximumSize: const Size(double.infinity, 48),
                     padding: const EdgeInsets.symmetric(horizontal: 6),
                     textStyle: const TextStyle(fontSize: 12),
+                    alignment: Alignment.center,
                   ),
                   icon: const ImageIcon(
                     AssetImage(NavigationIconAssets.recordSave),

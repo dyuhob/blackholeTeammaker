@@ -16,6 +16,8 @@ const _gridGap = 6.0;
 const _focusedInputColor = Color(0xFF42A5F5);
 const _actionButtonSize = 36.0;
 const _actionIconSize = 20.0;
+const _removeButtonSize = 24.0;
+const _removeIconSize = 14.0;
 
 class TeamBuilderScreen extends StatefulWidget {
   const TeamBuilderScreen({
@@ -194,16 +196,11 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                   style: Theme.of(context).textTheme.titleMedium,
                 ),
                 const Spacer(),
-                OutlinedButton(
+                TextButton(
                   onPressed: () {
                     _invalidScoreParticipantIds.clear();
                     widget.controller.resetAllMembers();
                   },
-                  style: OutlinedButton.styleFrom(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                  ),
                   child: const Text('전체 추가'),
                 ),
               ],
@@ -316,13 +313,22 @@ class _GuestAddCard extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Text('게스트 추가', style: TextStyle(color: Colors.black)),
-          const SizedBox(width: 6),
-          BorderedAssetIconButton(
-            assetPath: NavigationIconAssets.participantAdd,
-            tooltip: '게스트 추가',
-            onPressed: onTap,
-            size: _actionButtonSize,
-            iconSize: _actionIconSize,
+          const SizedBox(width: 2),
+          SizedBox.square(
+            dimension: 28,
+            child: IconButton(
+              key: const Key('guest-add-icon'),
+              tooltip: '게스트 추가',
+              onPressed: onTap,
+              padding: EdgeInsets.zero,
+              iconSize: _actionIconSize,
+              style: IconButton.styleFrom(
+                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+              ),
+              icon: const ImageIcon(
+                AssetImage(NavigationIconAssets.participantAdd),
+              ),
+            ),
           ),
         ],
       ),
@@ -392,7 +398,7 @@ class _ParticipantCard extends StatelessWidget {
     surfaceTintColor: Colors.transparent,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     child: Padding(
-      padding: const EdgeInsets.only(left: 9),
+      padding: const EdgeInsets.only(left: 9, right: 4),
       child: Row(
         children: [
           Expanded(
@@ -436,8 +442,8 @@ class _ParticipantCard extends StatelessWidget {
             tooltip: '참가자 제외',
             onPressed: onRemove,
             assetPath: NavigationIconAssets.participantRemove,
-            size: _actionButtonSize,
-            iconSize: _actionIconSize,
+            size: _removeButtonSize,
+            iconSize: _removeIconSize,
           ),
         ],
       ),

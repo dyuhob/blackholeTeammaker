@@ -23,9 +23,10 @@ class TeamResultExportWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Container(
+    key: const Key('team-result-export-background'),
     width: 720,
     padding: const EdgeInsets.all(32),
-    color: Colors.white,
+    color: const Color(0xFFF3F4F6),
     child: Column(
       mainAxisSize: MainAxisSize.min,
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -37,7 +38,8 @@ class TeamResultExportWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '${formatDateTime(result.createdAt)} · ${result.teams.length}팀 · 팀당 ${result.teamSize}명',
+          '팀당 ${result.teamSize}명 · ${result.teams.length}팀 · '
+          '${formatDateTime(result.createdAt)}',
           style: const TextStyle(color: Colors.black54),
         ),
         const SizedBox(height: 24),
@@ -106,6 +108,9 @@ class _TeamCard extends StatelessWidget {
                   vertical: 12,
                 ),
                 child: Row(
+                  key: ValueKey('team-total-row-${team.number}'),
+                  crossAxisAlignment: CrossAxisAlignment.baseline,
+                  textBaseline: TextBaseline.alphabetic,
                   children: [
                     const Expanded(
                       child: Text(
@@ -116,16 +121,7 @@ class _TeamCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    Text(
-                      '${team.rawScore}',
-                      key: ValueKey('team-total-score-${team.number}'),
-                      style: const TextStyle(
-                        color: Colors.black,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
                     if (team.bonusScore > 0) ...[
-                      const SizedBox(width: 16),
                       Text(
                         '+${team.bonusScore}',
                         key: ValueKey('team-bonus-score-${team.number}'),
@@ -134,7 +130,16 @@ class _TeamCard extends StatelessWidget {
                           fontWeight: FontWeight.bold,
                         ),
                       ),
+                      const SizedBox(width: 16),
                     ],
+                    Text(
+                      '${team.rawScore}',
+                      key: ValueKey('team-total-score-${team.number}'),
+                      style: const TextStyle(
+                        color: Colors.black,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
                   ],
                 ),
               ),

@@ -227,11 +227,12 @@ class _MemberScreenState extends State<MemberScreen> {
                                           );
                                         }
                                       },
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
                                       decoration: const InputDecoration(
                                         isDense: true,
                                         contentPadding: EdgeInsets.symmetric(
                                           horizontal: 8,
-                                          vertical: 8,
                                         ),
                                         errorStyle: TextStyle(
                                           fontSize: 0,

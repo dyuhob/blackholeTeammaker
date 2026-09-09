@@ -21,6 +21,10 @@ void main() {
 
     final icons = manifest['icons']! as List<Object?>;
     expect(
+      icons.whereType<Map<String, Object?>>().map((icon) => icon['src']),
+      everyElement(endsWith('?v=4')),
+    );
+    expect(
       icons.whereType<Map<String, Object?>>().map((icon) => icon['sizes']),
       containsAll(['192x192', '512x512']),
     );
@@ -42,8 +46,10 @@ void main() {
       ),
     );
     expect(index, contains('href="manifest.json"'));
+    expect(index, contains('href="icons/Icon-192.png?v=4"'));
     expect(index, contains('src="flutter_bootstrap.js"'));
-    expect(index, contains("register('/service_worker.js')"));
+    expect(index, contains("register('/service_worker.js', {"));
+    expect(index, contains("updateViaCache: 'none'"));
     expect(index, isNot(contains('flutter_service_worker_version')));
     expect(bootstrap, contains('{{flutter_js}}'));
     expect(bootstrap, contains('{{flutter_build_config}}'));
@@ -56,7 +62,9 @@ void main() {
     () {
       final worker = File('web/service_worker.js').readAsStringSync();
 
-      expect(worker, contains("const CACHE_NAME = 'team-maker-v3'"));
+      expect(worker, contains("const CACHE_NAME = 'team-maker-v4'"));
+      expect(worker, contains("'/icons/Icon-192.png?v=4'"));
+      expect(worker, contains("'/icons/Icon-512.png?v=4'"));
       expect(worker, contains("addEventListener('install'"));
       expect(worker, contains('skipWaiting()'));
       expect(worker, contains("addEventListener('activate'"));

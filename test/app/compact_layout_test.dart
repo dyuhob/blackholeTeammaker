@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:team_maker/app/navigation_icon_assets.dart';
 import 'package:team_maker/app/team_maker_app.dart';
 import 'package:team_maker/domain/member.dart';
 import 'package:team_maker/domain/participant.dart';
@@ -78,6 +79,29 @@ void main() {
     expect(guestAdd.top, firstUnselected.top);
     expect(guestAdd.width, closeTo(firstUnselected.width, 1));
     expect(guestAdd.height, closeTo(firstUnselected.height, 1));
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('guest-add-card')),
+        matching: find.byType(BorderedAssetIconButton),
+      ),
+      findsNothing,
+    );
+
+    expect(find.widgetWithText(TextButton, '전체 추가'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '전체 추가'), findsNothing);
+
+    final removeButton = tester.getRect(
+      find.descendant(
+        of: find.byKey(const Key('participant-card-participant-1')),
+        matching: find.byType(BorderedAssetIconButton),
+      ),
+    );
+    expect(removeButton.width, 24);
+    expect(removeButton.height, 24);
+    expect(
+      firstParticipant.right - removeButton.right,
+      greaterThanOrEqualTo(4),
+    );
 
     final teamSize = tester.getRect(find.byKey(const Key('team-size-control')));
     final buildButton = tester.getRect(
@@ -118,6 +142,20 @@ void main() {
     expect(inputTheme.fillColor, Colors.white);
     final focusedBorder = inputTheme.focusedBorder! as OutlineInputBorder;
     expect(focusedBorder.borderSide.color, const Color(0xFF42A5F5));
+    final memberScore = tester.widget<InputDecorator>(
+      find.descendant(
+        of: find.byKey(const Key('member-score-1')),
+        matching: find.byType(InputDecorator),
+      ),
+    );
+    expect(
+      memberScore.decoration.contentPadding,
+      const EdgeInsets.symmetric(horizontal: 8),
+    );
+
+    final memberAppBar = tester.widget<AppBar>(find.byType(AppBar));
+    final memberAppBarBorder = memberAppBar.shape! as Border;
+    expect(memberAppBarBorder.bottom.color, const Color(0xFFF3F4F6));
 
     final saveButton = find.byKey(const Key('save-members-button'));
     expect(
@@ -208,5 +246,35 @@ void main() {
           ?.color,
       const Color(0xFF1976D2),
     );
+    final totalRow = tester.widget<Row>(
+      find.byKey(const Key('team-total-row-1')),
+    );
+    expect(totalRow.crossAxisAlignment, CrossAxisAlignment.baseline);
+    expect(totalRow.textBaseline, TextBaseline.alphabetic);
+    final bonusRect = tester.getRect(
+      find.byKey(const Key('team-bonus-score-1')),
+    );
+    final totalRect = tester.getRect(
+      find.byKey(const Key('team-total-score-1')),
+    );
+    expect(bonusRect.right, lessThan(totalRect.left));
+  });
+
+  testWidgets('exported result uses the app background color', (tester) async {
+    final result = TeamResult(
+      id: 'result',
+      title: '테스트',
+      createdAt: DateTime(2026, 9, 8),
+      teamSize: 2,
+      teams: const [],
+    );
+    await tester.pumpWidget(
+      MaterialApp(home: TeamResultExportWidget(result: result)),
+    );
+
+    final background = tester.widget<Container>(
+      find.byKey(const Key('team-result-export-background')),
+    );
+    expect(background.color, const Color(0xFFF3F4F6));
   });
 }

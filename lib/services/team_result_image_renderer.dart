@@ -13,7 +13,7 @@ Future<Uint8List> captureTeamResultImage(
   InheritedTheme.captureAll(
     context,
     Material(
-      color: Colors.white,
+      color: const Color(0xFFF3F4F6),
       child: TeamResultExportWidget(result: result),
     ),
   ),
