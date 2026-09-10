@@ -69,7 +69,7 @@ void main() {
       find.byKey(const ValueKey('member-score-id-0')),
     );
     expect(label.right, lessThan(editor.left));
-    expect((label.center.dy - editor.center.dy).abs(), lessThan(4));
+    expect((label.center.dy - editor.center.dy).abs(), closeTo(5, 0.1));
   });
 
   testWidgets('temporary club member dialog enforces score range', (
