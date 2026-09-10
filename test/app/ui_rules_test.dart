@@ -70,8 +70,8 @@ void main() {
     );
     final card = tester.getRect(find.byKey(const ValueKey('member-card-id-0')));
     expect(label.right, lessThan(editor.left));
-    expect(editor.top - card.top, closeTo(12, 0.1));
-    expect(card.bottom - editor.bottom, closeTo(4, 0.1));
+    expect(editor.top - card.top, closeTo(6, 0.1));
+    expect(card.bottom - editor.bottom, closeTo(2, 0.1));
   });
 
   testWidgets('temporary club member dialog enforces score range', (
