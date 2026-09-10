@@ -16,7 +16,7 @@ class SupabaseMemberRemoteDataSource implements MemberRemoteDataSource {
       case SyncMutationKind.upsert:
         final member = Member.fromJson(mutation.payload);
         await _client
-            .from('user')
+            .from('member')
             .upsert(memberToRemoteRow(member), onConflict: 'id');
       case SyncMutationKind.delete:
         await _client.rpc(
@@ -29,7 +29,7 @@ class SupabaseMemberRemoteDataSource implements MemberRemoteDataSource {
   @override
   Future<List<Member>> fetchAll() async {
     final response = await _client
-        .from('user')
+        .from('member')
         .select('id,name,average,deleted_at')
         .isFilter('deleted_at', null);
     return response

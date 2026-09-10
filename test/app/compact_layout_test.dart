@@ -108,6 +108,8 @@ void main() {
       matching: find.byType(CircularAssetIconButton),
     );
     expect(tester.getSize(unselectedAddButton), const Size.square(24));
+    final unselectedAddRect = tester.getRect(unselectedAddButton);
+    expect(firstUnselected.right - unselectedAddRect.right, 8);
 
     expect(find.widgetWithText(TextButton, '전체 추가'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, '전체 추가'), findsNothing);
@@ -186,7 +188,7 @@ void main() {
     );
     expect(
       memberScore.decoration.contentPadding,
-      const EdgeInsets.fromLTRB(8, 0, 8, 8),
+      const EdgeInsets.symmetric(horizontal: 8),
     );
     final memberScoreField = tester.widget<TextField>(
       find.descendant(
@@ -194,7 +196,7 @@ void main() {
         matching: find.byType(TextField),
       ),
     );
-    expect(memberScoreField.textAlignVertical, const TextAlignVertical(y: 0.5));
+    expect(memberScoreField.textAlignVertical, TextAlignVertical.center);
     expect(
       tester.getSize(find.byKey(const Key('member-score-1'))),
       const Size(76, 32),
@@ -226,13 +228,10 @@ void main() {
         matching: find.byType(TextField),
       ),
     );
-    expect(
-      participantScoreField.textAlignVertical,
-      const TextAlignVertical(y: 0.5),
-    );
+    expect(participantScoreField.textAlignVertical, TextAlignVertical.center);
     expect(
       participantScoreField.decoration?.contentPadding,
-      const EdgeInsets.fromLTRB(4, 0, 4, 4),
+      const EdgeInsets.symmetric(horizontal: 4),
     );
     expect(
       tester.getSize(find.byKey(const Key('participant-score-participant-1'))),

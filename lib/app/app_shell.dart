@@ -28,7 +28,7 @@ class AppShell extends StatelessWidget {
   final TeamBuilderController teamBuilderController;
   final HistoryController historyController;
   final GalleryExporter galleryExporter;
-  final Future<void> Function() onMemberSaved;
+  final Future<bool> Function() onMemberSaved;
   final Future<void> Function() onHistoryChanged;
 
   static const _titles = ['클럽원 관리', '팀짜기', '기록'];

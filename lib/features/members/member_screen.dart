@@ -12,7 +12,7 @@ class MemberScreen extends StatefulWidget {
   const MemberScreen({super.key, required this.controller, this.onSaved});
 
   final MemberController controller;
-  final Future<void> Function()? onSaved;
+  final Future<bool> Function()? onSaved;
 
   @override
   State<MemberScreen> createState() => _MemberScreenState();
@@ -73,13 +73,14 @@ class _MemberScreenState extends State<MemberScreen> {
     }
     final saved = await widget.controller.save();
     if (!mounted) return;
-    if (saved) await widget.onSaved?.call();
-    if (!mounted) return;
-    _showMessage(
-      saved
-          ? '클럽원 명단을 저장했습니다.'
-          : widget.controller.errorMessage ?? '저장하지 못했습니다.',
-    );
+    if (!saved) {
+      _showMessage(widget.controller.errorMessage ?? '저장하지 못했습니다.');
+      return;
+    }
+    final synchronized = await widget.onSaved?.call() ?? false;
+    if (mounted && synchronized) {
+      _showMessage('클럽원 명단을 저장했습니다.');
+    }
   }
 
   void _showMessage(String message) {
@@ -187,77 +188,64 @@ class _MemberScreenState extends State<MemberScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  Transform.translate(
-                                    offset: const Offset(0, 1),
-                                    child: Padding(
-                                      padding: const EdgeInsets.only(
-                                        top: 12,
-                                        bottom: 4,
+                                  SizedBox(
+                                    width: 76,
+                                    height: 32,
+                                    child: TextFormField(
+                                      key: ValueKey(
+                                        'member-score-${member.id}',
                                       ),
-                                      child: SizedBox(
-                                        width: 76,
-                                        height: 32,
-                                        child: TextFormField(
-                                          key: ValueKey(
-                                            'member-score-${member.id}',
+                                      initialValue: '${member.score}',
+                                      keyboardType: TextInputType.number,
+                                      inputFormatters: [
+                                        FilteringTextInputFormatter.digitsOnly,
+                                      ],
+                                      onChanged: (value) {
+                                        final score = int.tryParse(value);
+                                        final valid =
+                                            score != null &&
+                                            isValidManualScore(score);
+                                        setState(() {
+                                          if (valid) {
+                                            _invalidScoreMemberIds.remove(
+                                              member.id,
+                                            );
+                                          } else {
+                                            _invalidScoreMemberIds.add(
+                                              member.id,
+                                            );
+                                          }
+                                        });
+                                        if (valid) {
+                                          widget.controller.updateScore(
+                                            member.id,
+                                            score,
+                                          );
+                                        }
+                                      },
+                                      textAlignVertical:
+                                          TextAlignVertical.center,
+                                      textAlign: TextAlign.center,
+                                      decoration: InputDecoration(
+                                        isDense: true,
+                                        contentPadding:
+                                            const EdgeInsets.symmetric(
+                                              horizontal: 8,
+                                            ),
+                                        border: const OutlineInputBorder(),
+                                        enabledBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: hasInvalidScore
+                                                ? const Color(0xFFD32F2F)
+                                                : const Color(0xFFBDBDBD),
                                           ),
-                                          initialValue: '${member.score}',
-                                          keyboardType: TextInputType.number,
-                                          inputFormatters: [
-                                            FilteringTextInputFormatter
-                                                .digitsOnly,
-                                          ],
-                                          onChanged: (value) {
-                                            final score = int.tryParse(value);
-                                            final valid =
-                                                score != null &&
-                                                isValidManualScore(score);
-                                            setState(() {
-                                              if (valid) {
-                                                _invalidScoreMemberIds.remove(
-                                                  member.id,
-                                                );
-                                              } else {
-                                                _invalidScoreMemberIds.add(
-                                                  member.id,
-                                                );
-                                              }
-                                            });
-                                            if (valid) {
-                                              widget.controller.updateScore(
-                                                member.id,
-                                                score,
-                                              );
-                                            }
-                                          },
-                                          textAlignVertical:
-                                              const TextAlignVertical(y: 0.5),
-                                          textAlign: TextAlign.center,
-                                          decoration: InputDecoration(
-                                            isDense: true,
-                                            contentPadding:
-                                                const EdgeInsets.fromLTRB(
-                                                  8,
-                                                  0,
-                                                  8,
-                                                  8,
-                                                ),
-                                            border: const OutlineInputBorder(),
-                                            enabledBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: hasInvalidScore
-                                                    ? const Color(0xFFD32F2F)
-                                                    : const Color(0xFFBDBDBD),
-                                              ),
-                                            ),
-                                            focusedBorder: OutlineInputBorder(
-                                              borderSide: BorderSide(
-                                                color: hasInvalidScore
-                                                    ? const Color(0xFFD32F2F)
-                                                    : const Color(0xFF42A5F5),
-                                                width: 2,
-                                              ),
-                                            ),
+                                        ),
+                                        focusedBorder: OutlineInputBorder(
+                                          borderSide: BorderSide(
+                                            color: hasInvalidScore
+                                                ? const Color(0xFFD32F2F)
+                                                : const Color(0xFF42A5F5),
+                                            width: 2,
                                           ),
                                         ),
                                       ),

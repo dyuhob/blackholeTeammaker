@@ -13,9 +13,11 @@ class MemberSyncCoordinator implements MemberSync {
 
   @override
   Future<SyncOutcome<List<Member>>> synchronize(List<Member> visible) {
-    final running = _inFlight;
-    if (running != null) return running;
-    final future = _run([...visible]);
+    final previous = _inFlight;
+    final snapshot = [...visible];
+    final future = previous == null
+        ? _run(snapshot)
+        : previous.then((_) => _run(snapshot));
     _inFlight = future;
     return future.whenComplete(() {
       if (identical(_inFlight, future)) _inFlight = null;

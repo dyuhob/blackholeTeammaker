@@ -350,7 +350,7 @@ class _UnselectedMemberCard extends StatelessWidget {
     surfaceTintColor: Colors.transparent,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     child: Padding(
-      padding: const EdgeInsets.only(left: 9),
+      padding: const EdgeInsets.only(left: 9, right: 8),
       child: Row(
         children: [
           Expanded(
@@ -413,30 +413,24 @@ class _ParticipantCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 3),
-          Transform.translate(
-            offset: const Offset(0, 1),
-            child: Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: SizedBox(
-                width: 45,
-                height: 28,
-                child: TextFormField(
-                  key: ValueKey('participant-score-${participant.id}'),
-                  initialValue: '${participant.score}',
-                  keyboardType: TextInputType.number,
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  onChanged: onScoreChanged,
-                  textAlign: TextAlign.center,
-                  textAlignVertical: const TextAlignVertical(y: 0.5),
-                  style: const TextStyle(fontSize: 12),
-                  decoration: const InputDecoration(
-                    isDense: true,
-                    filled: true,
-                    fillColor: Colors.white,
-                    contentPadding: EdgeInsets.fromLTRB(4, 0, 4, 4),
-                    border: OutlineInputBorder(),
-                  ),
-                ),
+          SizedBox(
+            width: 45,
+            height: 28,
+            child: TextFormField(
+              key: ValueKey('participant-score-${participant.id}'),
+              initialValue: '${participant.score}',
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: onScoreChanged,
+              textAlign: TextAlign.center,
+              textAlignVertical: TextAlignVertical.center,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                border: OutlineInputBorder(),
               ),
             ),
           ),

@@ -150,13 +150,13 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
     unawaited(_syncTab(index));
   }
 
-  Future<void> _syncTab(int index, {bool showOfflineMessage = false}) async {
-    if (!mounted) return;
+  Future<bool> _syncTab(int index, {bool showOfflineMessage = false}) async {
+    if (!mounted) return false;
     if (index == 0 && widget.memberSync != null) {
       final outcome = await widget.memberSync!.synchronize(
         _memberController.draftMembers,
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       if (outcome.kind == SyncOutcomeKind.remoteChanged) {
         final load = await _confirmRemoteLoad();
         if (load == true && mounted) {
@@ -167,13 +167,13 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
           outcome.kind == SyncOutcomeKind.offline) {
         _showMessage('기기에 저장됨 · 연결되면 동기화됩니다');
       }
-      return;
+      return outcome.kind != SyncOutcomeKind.offline;
     }
     if (index == 2 && widget.historySync != null) {
       final outcome = await widget.historySync!.synchronize(
         _historyController.results,
       );
-      if (!mounted) return;
+      if (!mounted) return false;
       if (outcome.kind == SyncOutcomeKind.remoteChanged) {
         final load = await _confirmRemoteLoad();
         if (load == true && mounted) {
@@ -184,7 +184,9 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
           outcome.kind == SyncOutcomeKind.offline) {
         _showMessage('기기에 저장됨 · 연결되면 동기화됩니다');
       }
+      return outcome.kind != SyncOutcomeKind.offline;
     }
+    return false;
   }
 
   Future<bool?> _confirmRemoteLoad() async {
@@ -324,7 +326,9 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
             historyController: _historyController,
             galleryExporter: widget.galleryExporter,
             onMemberSaved: () => _syncTab(0, showOfflineMessage: true),
-            onHistoryChanged: () => _syncTab(2, showOfflineMessage: true),
+            onHistoryChanged: () async {
+              await _syncTab(2, showOfflineMessage: true);
+            },
           )
         : const Scaffold(body: Center(child: CircularProgressIndicator())),
   );

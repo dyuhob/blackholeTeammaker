@@ -128,6 +128,7 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(sync.calls, 2);
+    expect(find.text('클럽원 명단을 저장했습니다.'), findsOneWidget);
   });
 
   testWidgets('an unchanged member roster can be explicitly synchronized', (
@@ -158,6 +159,38 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(sync.calls, 2);
+  });
+
+  testWidgets('failed member synchronization never shows save completion', (
+    tester,
+  ) async {
+    final sync = SequenceMemberSync([
+      const SyncOutcome.unchanged(),
+      SyncOutcome.offline(Exception('network unavailable')),
+    ]);
+    await tester.pumpWidget(
+      TeamMakerApp(
+        memberRepository: MemoryMemberRepository([
+          Member(id: 'one', name: '기존 회원', score: 180),
+        ]),
+        historyRepository: MemoryHistoryRepository(),
+        workspaceRepository: MemoryWorkspaceRepository(),
+        galleryExporter: MemoryGalleryExporter(),
+        memberSync: sync,
+        random: Random(1),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.byKey(const Key('save-members-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('기기에 저장됨 · 연결되면 동기화됩니다'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
+    expect(find.text('클럽원 명단을 저장했습니다.'), findsNothing);
   });
 
   testWidgets('remote member differences require confirmation before load', (
@@ -246,6 +279,20 @@ class CountingHistorySync implements HistorySync {
     calls++;
     return const SyncOutcome.unchanged();
   }
+}
+
+class SequenceMemberSync implements MemberSync {
+  SequenceMemberSync(this.outcomes);
+
+  final List<SyncOutcome<List<Member>>> outcomes;
+  var _nextOutcome = 0;
+
+  @override
+  Future<void> acceptRemote(List<Member> snapshot) async {}
+
+  @override
+  Future<SyncOutcome<List<Member>>> synchronize(List<Member> visible) async =>
+      outcomes[_nextOutcome++];
 }
 
 class FakePwaInstallService implements PwaInstallService {

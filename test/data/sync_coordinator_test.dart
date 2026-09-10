@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:team_maker/core/storage/json_object_store.dart';
 import 'package:team_maker/data/json_member_repository.dart';
@@ -74,6 +76,28 @@ void main() {
     expect(outcome.kind, SyncOutcomeKind.unchanged);
   });
 
+  test(
+    'member sync started during another run uploads the newer outbox',
+    () async {
+      final local = JsonMemberRepository(MemoryStore());
+      final remote = BlockingMemberRemote();
+      final coordinator = MemberSyncCoordinator(local: local, remote: remote);
+      final member = Member(id: 'new-member', name: '새 회원', score: 180);
+
+      final initialSync = coordinator.synchronize(const []);
+      await remote.firstFetchStarted.future;
+      await local.saveAll([member]);
+      final saveSync = coordinator.synchronize([member]);
+      remote.releaseFirstFetch.complete();
+
+      expect((await initialSync).kind, SyncOutcomeKind.unchanged);
+      expect((await saveSync).kind, SyncOutcomeKind.unchanged);
+      expect(remote.pushed.map((value) => value.entityId), ['new-member']);
+      expect(remote.fetchCount, 2);
+      expect((await local.readSyncDocument()).pendingMutations, isEmpty);
+    },
+  );
+
   test('history sync stages a different complete history', () async {
     final local = JsonTeamHistoryRepository(MemoryStore());
     final localResult = result('one', '기존');
@@ -133,6 +157,33 @@ class FakeHistoryRemote implements HistoryRemoteDataSource {
 
   @override
   Future<void> push(PendingMutation mutation) async {}
+}
+
+class BlockingMemberRemote implements MemberRemoteDataSource {
+  final firstFetchStarted = Completer<void>();
+  final releaseFirstFetch = Completer<void>();
+  final List<PendingMutation> pushed = [];
+  final List<Member> _values = [];
+  var fetchCount = 0;
+
+  @override
+  Future<List<Member>> fetchAll() async {
+    fetchCount++;
+    if (fetchCount == 1) {
+      firstFetchStarted.complete();
+      await releaseFirstFetch.future;
+    }
+    return [..._values];
+  }
+
+  @override
+  Future<void> push(PendingMutation mutation) async {
+    pushed.add(mutation);
+    final member = Member.fromJson(mutation.payload);
+    _values
+      ..removeWhere((value) => value.id == member.id)
+      ..add(member);
+  }
 }
 
 TeamResult result(String id, String title) => TeamResult(
