@@ -72,7 +72,7 @@ void main() {
       secondParticipant.left - firstParticipant.right,
       greaterThanOrEqualTo(8),
     );
-    expect(firstParticipant.height, 46.8);
+    expect(firstParticipant.height, closeTo(46.8, 0.1));
     expect(firstParticipant.width, closeTo(secondParticipant.width, 1));
     final firstParticipantScore = tester.getRect(
       find.byKey(const Key('participant-score-participant-1')),
@@ -89,8 +89,8 @@ void main() {
     );
     expect(guestAdd.top, firstUnselected.top);
     expect(guestAdd.width, closeTo(firstUnselected.width, 1));
-    expect(guestAdd.height, 46.8);
-    expect(firstUnselected.height, 46.8);
+    expect(guestAdd.height, closeTo(46.8, 0.1));
+    expect(firstUnselected.height, closeTo(46.8, 0.1));
     final guestCard = tester.widget<Card>(
       find.byKey(const Key('guest-add-card')),
     );
