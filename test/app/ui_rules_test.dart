@@ -27,7 +27,7 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('club member inputs enforce 90 to 200 and align score label', (
+  testWidgets('club member score input uses asymmetric vertical spacing', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -68,8 +68,10 @@ void main() {
     final editor = tester.getRect(
       find.byKey(const ValueKey('member-score-id-0')),
     );
+    final card = tester.getRect(find.byKey(const ValueKey('member-card-id-0')));
     expect(label.right, lessThan(editor.left));
-    expect((label.center.dy - editor.center.dy).abs(), lessThan(1));
+    expect(editor.top - card.top, closeTo(12, 0.1));
+    expect(card.bottom - editor.bottom, closeTo(4, 0.1));
   });
 
   testWidgets('temporary club member dialog enforces score range', (

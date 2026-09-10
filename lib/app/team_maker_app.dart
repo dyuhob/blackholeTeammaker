@@ -326,9 +326,7 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
             historyController: _historyController,
             galleryExporter: widget.galleryExporter,
             onMemberSaved: () => _syncTab(0, showOfflineMessage: true),
-            onHistoryChanged: () async {
-              await _syncTab(2, showOfflineMessage: true);
-            },
+            onHistoryChanged: () => _syncTab(2, showOfflineMessage: true),
           )
         : const Scaffold(body: Center(child: CircularProgressIndicator())),
   );

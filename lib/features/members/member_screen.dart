@@ -188,64 +188,68 @@ class _MemberScreenState extends State<MemberScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  SizedBox(
-                                    width: 76,
-                                    height: 32,
-                                    child: TextFormField(
-                                      key: ValueKey(
-                                        'member-score-${member.id}',
-                                      ),
-                                      initialValue: '${member.score}',
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      onChanged: (value) {
-                                        final score = int.tryParse(value);
-                                        final valid =
-                                            score != null &&
-                                            isValidManualScore(score);
-                                        setState(() {
+                                  Transform.translate(
+                                    offset: const Offset(0, 4),
+                                    child: SizedBox(
+                                      width: 76,
+                                      height: 32,
+                                      child: TextFormField(
+                                        key: ValueKey(
+                                          'member-score-${member.id}',
+                                        ),
+                                        initialValue: '${member.score}',
+                                        keyboardType: TextInputType.number,
+                                        inputFormatters: [
+                                          FilteringTextInputFormatter
+                                              .digitsOnly,
+                                        ],
+                                        onChanged: (value) {
+                                          final score = int.tryParse(value);
+                                          final valid =
+                                              score != null &&
+                                              isValidManualScore(score);
+                                          setState(() {
+                                            if (valid) {
+                                              _invalidScoreMemberIds.remove(
+                                                member.id,
+                                              );
+                                            } else {
+                                              _invalidScoreMemberIds.add(
+                                                member.id,
+                                              );
+                                            }
+                                          });
                                           if (valid) {
-                                            _invalidScoreMemberIds.remove(
+                                            widget.controller.updateScore(
                                               member.id,
-                                            );
-                                          } else {
-                                            _invalidScoreMemberIds.add(
-                                              member.id,
+                                              score,
                                             );
                                           }
-                                        });
-                                        if (valid) {
-                                          widget.controller.updateScore(
-                                            member.id,
-                                            score,
-                                          );
-                                        }
-                                      },
-                                      textAlignVertical:
-                                          TextAlignVertical.center,
-                                      textAlign: TextAlign.center,
-                                      decoration: InputDecoration(
-                                        isDense: true,
-                                        contentPadding:
-                                            const EdgeInsets.symmetric(
-                                              horizontal: 8,
+                                        },
+                                        textAlignVertical:
+                                            TextAlignVertical.center,
+                                        textAlign: TextAlign.center,
+                                        decoration: InputDecoration(
+                                          isDense: true,
+                                          contentPadding:
+                                              const EdgeInsets.symmetric(
+                                                horizontal: 8,
+                                              ),
+                                          border: const OutlineInputBorder(),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: hasInvalidScore
+                                                  ? const Color(0xFFD32F2F)
+                                                  : const Color(0xFFBDBDBD),
                                             ),
-                                        border: const OutlineInputBorder(),
-                                        enabledBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: hasInvalidScore
-                                                ? const Color(0xFFD32F2F)
-                                                : const Color(0xFFBDBDBD),
                                           ),
-                                        ),
-                                        focusedBorder: OutlineInputBorder(
-                                          borderSide: BorderSide(
-                                            color: hasInvalidScore
-                                                ? const Color(0xFFD32F2F)
-                                                : const Color(0xFF42A5F5),
-                                            width: 2,
+                                          focusedBorder: OutlineInputBorder(
+                                            borderSide: BorderSide(
+                                              color: hasInvalidScore
+                                                  ? const Color(0xFFD32F2F)
+                                                  : const Color(0xFF42A5F5),
+                                              width: 2,
+                                            ),
                                           ),
                                         ),
                                       ),

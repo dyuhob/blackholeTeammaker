@@ -101,6 +101,43 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(historySync.calls, 1);
+    expect(find.text('기록에 저장했습니다.'), findsOneWidget);
+  });
+
+  testWidgets('failed history synchronization never shows save completion', (
+    tester,
+  ) async {
+    final historySync = SequenceHistorySync([
+      SyncOutcome.offline(Exception('network unavailable')),
+    ]);
+    await tester.pumpWidget(
+      TeamMakerApp(
+        memberRepository: MemoryMemberRepository([
+          Member(id: 'member-1', name: '회원', score: 180),
+        ]),
+        historyRepository: MemoryHistoryRepository(),
+        workspaceRepository: MemoryWorkspaceRepository(),
+        galleryExporter: MemoryGalleryExporter(),
+        historySync: historySync,
+        random: Random(1),
+        now: () => DateTime(2026, 9, 9),
+      ),
+    );
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('팀짜기').last);
+    await tester.pumpAndSettle();
+    await tester.enterText(find.byKey(const Key('team-size-input')), '1');
+    await tester.tap(find.byKey(const Key('build-teams-button')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('save-result-button')));
+    await tester.pumpAndSettle();
+
+    expect(find.text('기기에 저장됨 · 연결되면 동기화됩니다'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 5));
+    await tester.pumpAndSettle();
+
+    expect(find.text('기록에 저장했습니다.'), findsNothing);
   });
 
   testWidgets('saving members requests another synchronization', (
@@ -279,6 +316,21 @@ class CountingHistorySync implements HistorySync {
     calls++;
     return const SyncOutcome.unchanged();
   }
+}
+
+class SequenceHistorySync implements HistorySync {
+  SequenceHistorySync(this.outcomes);
+
+  final List<SyncOutcome<List<TeamResult>>> outcomes;
+  var _nextOutcome = 0;
+
+  @override
+  Future<void> acceptRemote(List<TeamResult> snapshot) async {}
+
+  @override
+  Future<SyncOutcome<List<TeamResult>>> synchronize(
+    List<TeamResult> visible,
+  ) async => outcomes[_nextOutcome++];
 }
 
 class SequenceMemberSync implements MemberSync {

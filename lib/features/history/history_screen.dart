@@ -16,7 +16,7 @@ class HistoryScreen extends StatelessWidget {
 
   final HistoryController controller;
   final GalleryExporter galleryExporter;
-  final Future<void> Function()? onHistoryChanged;
+  final Future<bool> Function()? onHistoryChanged;
 
   @override
   Widget build(BuildContext context) => AnimatedBuilder(

@@ -32,7 +32,7 @@ class TeamBuilderScreen extends StatefulWidget {
   final TeamBuilderController controller;
   final HistoryController historyController;
   final GalleryExporter galleryExporter;
-  final Future<void> Function()? onHistoryChanged;
+  final Future<bool> Function()? onHistoryChanged;
 
   @override
   State<TeamBuilderScreen> createState() => _TeamBuilderScreenState();
@@ -413,24 +413,27 @@ class _ParticipantCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 3),
-          SizedBox(
-            width: 45,
-            height: 28,
-            child: TextFormField(
-              key: ValueKey('participant-score-${participant.id}'),
-              initialValue: '${participant.score}',
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: onScoreChanged,
-              textAlign: TextAlign.center,
-              textAlignVertical: TextAlignVertical.center,
-              style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(
-                isDense: true,
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(horizontal: 4),
-                border: OutlineInputBorder(),
+          Transform.translate(
+            offset: const Offset(0, 2),
+            child: SizedBox(
+              width: 45,
+              height: 28,
+              child: TextFormField(
+                key: ValueKey('participant-score-${participant.id}'),
+                initialValue: '${participant.score}',
+                keyboardType: TextInputType.number,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                onChanged: onScoreChanged,
+                textAlign: TextAlign.center,
+                textAlignVertical: TextAlignVertical.center,
+                style: const TextStyle(fontSize: 12),
+                decoration: const InputDecoration(
+                  isDense: true,
+                  filled: true,
+                  fillColor: Colors.white,
+                  contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                  border: OutlineInputBorder(),
+                ),
               ),
             ),
           ),

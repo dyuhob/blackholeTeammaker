@@ -22,7 +22,7 @@ class TeamResultScreen extends StatefulWidget {
   final GalleryExporter galleryExporter;
   final bool initiallySaved;
   final ValueChanged<TeamResult>? onSaved;
-  final Future<void> Function()? onHistoryChanged;
+  final Future<bool> Function()? onHistoryChanged;
 
   @override
   State<TeamResultScreen> createState() => _TeamResultScreenState();
@@ -73,9 +73,9 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
         _savedTitle = title;
       });
       widget.onSaved?.call(updated);
-      await widget.onHistoryChanged?.call();
+      final synchronized = await widget.onHistoryChanged?.call() ?? false;
       if (!mounted) return;
-      _showMessage('기록에 저장했습니다.');
+      if (synchronized) _showMessage('기록에 저장했습니다.');
     } else if (mounted) {
       _showMessage(widget.historyController.errorMessage ?? '저장하지 못했습니다.');
     }

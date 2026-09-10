@@ -114,6 +114,28 @@ void main() {
     await coordinator.acceptRemote(outcome.snapshot!);
     expect((await local.loadAll()).single.title, '변경');
   });
+
+  test(
+    'history sync started during another run uploads the newer outbox',
+    () async {
+      final local = JsonTeamHistoryRepository(MemoryStore());
+      final remote = BlockingHistoryRemote();
+      final coordinator = HistorySyncCoordinator(local: local, remote: remote);
+      final savedResult = result('new-result', '새 기록');
+
+      final initialSync = coordinator.synchronize(const []);
+      await remote.firstFetchStarted.future;
+      await local.save(savedResult);
+      final saveSync = coordinator.synchronize([savedResult]);
+      remote.releaseFirstFetch.complete();
+
+      expect((await initialSync).kind, SyncOutcomeKind.unchanged);
+      expect((await saveSync).kind, SyncOutcomeKind.unchanged);
+      expect(remote.pushed.map((value) => value.entityId), ['new-result']);
+      expect(remote.fetchCount, 2);
+      expect((await local.readSyncDocument()).pendingMutations, isEmpty);
+    },
+  );
 }
 
 class MemoryStore implements JsonObjectStore {
@@ -183,6 +205,33 @@ class BlockingMemberRemote implements MemberRemoteDataSource {
     _values
       ..removeWhere((value) => value.id == member.id)
       ..add(member);
+  }
+}
+
+class BlockingHistoryRemote implements HistoryRemoteDataSource {
+  final firstFetchStarted = Completer<void>();
+  final releaseFirstFetch = Completer<void>();
+  final List<PendingMutation> pushed = [];
+  final List<TeamResult> _values = [];
+  var fetchCount = 0;
+
+  @override
+  Future<List<TeamResult>> fetchAll() async {
+    fetchCount++;
+    if (fetchCount == 1) {
+      firstFetchStarted.complete();
+      await releaseFirstFetch.future;
+    }
+    return [..._values];
+  }
+
+  @override
+  Future<void> push(PendingMutation mutation) async {
+    pushed.add(mutation);
+    final savedResult = TeamResult.fromJson(mutation.payload);
+    _values
+      ..removeWhere((value) => value.id == savedResult.id)
+      ..add(savedResult);
   }
 }
 
