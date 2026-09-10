@@ -414,7 +414,7 @@ class _ParticipantCard extends StatelessWidget {
           ),
           const SizedBox(width: 3),
           Transform.translate(
-            offset: const Offset(0, 2),
+            offset: const Offset(0, 4),
             child: SizedBox(
               width: 45,
               height: 28,

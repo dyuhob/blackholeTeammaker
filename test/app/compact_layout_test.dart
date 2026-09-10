@@ -77,10 +77,10 @@ void main() {
     final firstParticipantScore = tester.getRect(
       find.byKey(const Key('participant-score-participant-1')),
     );
-    expect(firstParticipantScore.top - firstParticipant.top, closeTo(6, 0.1));
+    expect(firstParticipantScore.top - firstParticipant.top, closeTo(8, 0.1));
     expect(
       firstParticipant.bottom - firstParticipantScore.bottom,
-      closeTo(2, 0.1),
+      closeTo(0, 0.1),
     );
 
     final guestAdd = tester.getRect(find.byKey(const Key('guest-add-card')));
