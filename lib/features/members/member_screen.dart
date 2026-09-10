@@ -189,10 +189,10 @@ class _MemberScreenState extends State<MemberScreen> {
                                   ),
                                   const SizedBox(width: 8),
                                   Transform.translate(
-                                    offset: const Offset(0, 4),
+                                    offset: const Offset(0, 2),
                                     child: SizedBox(
                                       width: 76,
-                                      height: 32,
+                                      height: 40,
                                       child: TextFormField(
                                         key: ValueKey(
                                           'member-score-${member.id}',

@@ -77,7 +77,7 @@ void main() {
     final firstParticipantScore = tester.getRect(
       find.byKey(const Key('participant-score-participant-1')),
     );
-    expect(firstParticipantScore.top - firstParticipant.top, closeTo(8, 0.1));
+    expect(firstParticipantScore.top - firstParticipant.top, closeTo(4, 0.1));
     expect(
       firstParticipant.bottom - firstParticipantScore.bottom,
       closeTo(0, 0.1),
@@ -207,7 +207,7 @@ void main() {
     expect(memberScoreField.textAlignVertical, TextAlignVertical.center);
     expect(
       tester.getSize(find.byKey(const Key('member-score-1'))),
-      const Size(76, 32),
+      const Size(76, 40),
     );
     final memberCard = tester.getRect(find.byKey(const Key('member-card-1')));
     final trashButton = tester.getRect(find.byType(BorderedAssetIconButton));
@@ -243,7 +243,7 @@ void main() {
     );
     expect(
       tester.getSize(find.byKey(const Key('participant-score-participant-1'))),
-      const Size(45, 28),
+      const Size(45, 32),
     );
     final topControlHeight = tester
         .getRect(find.byKey(const Key('team-size-control')))

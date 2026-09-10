@@ -414,10 +414,10 @@ class _ParticipantCard extends StatelessWidget {
           ),
           const SizedBox(width: 3),
           Transform.translate(
-            offset: const Offset(0, 4),
+            offset: const Offset(0, 2),
             child: SizedBox(
               width: 45,
-              height: 28,
+              height: 32,
               child: TextFormField(
                 key: ValueKey('participant-score-${participant.id}'),
                 initialValue: '${participant.score}',
