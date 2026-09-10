@@ -11,7 +11,7 @@ import '../history/team_result_screen.dart';
 import 'team_builder_controller.dart';
 
 const _controlHeight = 48.0;
-const _compactCardHeight = 46.8;
+const _compactCardHeight = 36.0;
 const _gridGap = 8.0;
 const _focusedInputColor = Color(0xFF42A5F5);
 const _guestBackgroundColor = Color(0xFFA7B9ED);
@@ -415,7 +415,7 @@ class _ParticipantCard extends StatelessWidget {
           const SizedBox(width: 3),
           SizedBox(
             width: 45,
-            height: 41.6,
+            height: 34,
             child: TextFormField(
               key: ValueKey('participant-score-${participant.id}'),
               initialValue: '${participant.score}',

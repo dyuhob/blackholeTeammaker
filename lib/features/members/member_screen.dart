@@ -6,7 +6,7 @@ import '../../domain/manual_score.dart';
 import 'member_controller.dart';
 
 const _controlHeight = 48.0;
-const _memberCardHeight = 62.4;
+const _memberCardHeight = 48.0;
 
 class MemberScreen extends StatefulWidget {
   const MemberScreen({super.key, required this.controller, this.onSaved});
@@ -190,7 +190,7 @@ class _MemberScreenState extends State<MemberScreen> {
                                   const SizedBox(width: 8),
                                   SizedBox(
                                     width: 76,
-                                    height: 52,
+                                    height: 44,
                                     child: TextFormField(
                                       key: ValueKey(
                                         'member-score-${member.id}',
