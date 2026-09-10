@@ -15,7 +15,7 @@ class WebGalleryExportService implements GalleryExporter {
   String get actionLabel => '갤러리 저장';
 
   @override
-  String get busyLabel => '다운로드 준비 중…';
+  String get busyLabel => '준비 중…';
 
   @override
   String get successMessage => '이미지를 다운로드했습니다.';

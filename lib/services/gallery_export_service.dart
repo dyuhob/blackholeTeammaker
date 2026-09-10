@@ -13,7 +13,7 @@ class GalleryExportService implements GalleryExporter {
   String get actionLabel => '갤러리 저장';
 
   @override
-  String get busyLabel => '이미지 생성 중…';
+  String get busyLabel => '준비 중…';
 
   @override
   String get successMessage => '갤러리에 저장했습니다.';

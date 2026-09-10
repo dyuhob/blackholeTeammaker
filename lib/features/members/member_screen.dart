@@ -114,7 +114,7 @@ class _MemberScreenState extends State<MemberScreen> {
                       decoration: _inputDecoration('클럽원 이름'),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   SizedBox(
                     width: 92,
                     child: TextField(
@@ -128,7 +128,7 @@ class _MemberScreenState extends State<MemberScreen> {
                       decoration: _inputDecoration('점수'),
                     ),
                   ),
-                  const SizedBox(width: 8),
+                  const SizedBox(width: 10),
                   FilledButton(onPressed: _addMember, child: const Text('추가')),
                 ],
               ),
@@ -147,10 +147,14 @@ class _MemberScreenState extends State<MemberScreen> {
                   ? const Center(child: Text('클럽원 이름과 점수를 추가해 주세요.'))
                   : ListView.separated(
                       itemCount: widget.controller.draftMembers.length,
-                      separatorBuilder: (_, _) => const SizedBox(height: 4),
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
                       itemBuilder: (context, index) {
                         final member = widget.controller.draftMembers[index];
+                        final hasInvalidScore = _invalidScoreMemberIds.contains(
+                          member.id,
+                        );
                         return SizedBox(
+                          key: ValueKey('member-card-${member.id}'),
                           height: _memberCardHeight,
                           child: Card(
                             margin: EdgeInsets.zero,
@@ -161,7 +165,7 @@ class _MemberScreenState extends State<MemberScreen> {
                               borderRadius: BorderRadius.circular(12),
                             ),
                             child: Padding(
-                              padding: const EdgeInsets.fromLTRB(12, 4, 2, 4),
+                              padding: const EdgeInsets.fromLTRB(12, 0, 8, 0),
                               child: Row(
                                 children: [
                                   Expanded(
@@ -183,66 +187,83 @@ class _MemberScreenState extends State<MemberScreen> {
                                     ),
                                   ),
                                   const SizedBox(width: 8),
-                                  SizedBox(
-                                    width: 76,
-                                    height: 36,
-                                    child: TextFormField(
-                                      key: ValueKey(
-                                        'member-score-${member.id}',
+                                  Transform.translate(
+                                    offset: const Offset(0, 1),
+                                    child: Padding(
+                                      padding: const EdgeInsets.only(
+                                        top: 12,
+                                        bottom: 4,
                                       ),
-                                      initialValue: '${member.score}',
-                                      keyboardType: TextInputType.number,
-                                      inputFormatters: [
-                                        FilteringTextInputFormatter.digitsOnly,
-                                      ],
-                                      autovalidateMode:
-                                          AutovalidateMode.onUserInteraction,
-                                      validator: (value) {
-                                        final score = int.tryParse(value ?? '');
-                                        return score != null &&
-                                                isValidManualScore(score)
-                                            ? null
-                                            : '90~200';
-                                      },
-                                      onChanged: (value) {
-                                        final score = int.tryParse(value);
-                                        final valid =
-                                            score != null &&
-                                            isValidManualScore(score);
-                                        setState(() {
-                                          if (valid) {
-                                            _invalidScoreMemberIds.remove(
-                                              member.id,
-                                            );
-                                          } else {
-                                            _invalidScoreMemberIds.add(
-                                              member.id,
-                                            );
-                                          }
-                                        });
-                                        if (valid) {
-                                          widget.controller.updateScore(
-                                            member.id,
-                                            score,
-                                          );
-                                        }
-                                      },
-                                      textAlignVertical:
-                                          TextAlignVertical.center,
-                                      decoration: const InputDecoration(
-                                        isDense: true,
-                                        contentPadding: EdgeInsets.symmetric(
-                                          horizontal: 8,
+                                      child: SizedBox(
+                                        width: 76,
+                                        height: 32,
+                                        child: TextFormField(
+                                          key: ValueKey(
+                                            'member-score-${member.id}',
+                                          ),
+                                          initialValue: '${member.score}',
+                                          keyboardType: TextInputType.number,
+                                          inputFormatters: [
+                                            FilteringTextInputFormatter
+                                                .digitsOnly,
+                                          ],
+                                          onChanged: (value) {
+                                            final score = int.tryParse(value);
+                                            final valid =
+                                                score != null &&
+                                                isValidManualScore(score);
+                                            setState(() {
+                                              if (valid) {
+                                                _invalidScoreMemberIds.remove(
+                                                  member.id,
+                                                );
+                                              } else {
+                                                _invalidScoreMemberIds.add(
+                                                  member.id,
+                                                );
+                                              }
+                                            });
+                                            if (valid) {
+                                              widget.controller.updateScore(
+                                                member.id,
+                                                score,
+                                              );
+                                            }
+                                          },
+                                          textAlignVertical:
+                                              const TextAlignVertical(y: 0.5),
+                                          textAlign: TextAlign.center,
+                                          decoration: InputDecoration(
+                                            isDense: true,
+                                            contentPadding:
+                                                const EdgeInsets.fromLTRB(
+                                                  8,
+                                                  0,
+                                                  8,
+                                                  8,
+                                                ),
+                                            border: const OutlineInputBorder(),
+                                            enabledBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: hasInvalidScore
+                                                    ? const Color(0xFFD32F2F)
+                                                    : const Color(0xFFBDBDBD),
+                                              ),
+                                            ),
+                                            focusedBorder: OutlineInputBorder(
+                                              borderSide: BorderSide(
+                                                color: hasInvalidScore
+                                                    ? const Color(0xFFD32F2F)
+                                                    : const Color(0xFF42A5F5),
+                                                width: 2,
+                                              ),
+                                            ),
+                                          ),
                                         ),
-                                        errorStyle: TextStyle(
-                                          fontSize: 0,
-                                          height: 0,
-                                        ),
-                                        border: OutlineInputBorder(),
                                       ),
                                     ),
                                   ),
-                                  const SizedBox(width: 6),
+                                  const SizedBox(width: 8),
                                   BorderedAssetIconButton(
                                     tooltip: '클럽원 삭제',
                                     onPressed: () {

@@ -38,9 +38,12 @@ class TeamResultExportWidget extends StatelessWidget {
         ),
         const SizedBox(height: 8),
         Text(
-          '팀당 ${result.teamSize}명 · ${result.teams.length}팀 · '
-          '${formatDateTime(result.createdAt)}',
-          style: const TextStyle(color: Colors.black54),
+          formatResultMetadata(result),
+          key: const Key('team-result-export-metadata'),
+          style: const TextStyle(
+            color: Color(0xFF1976D2),
+            fontWeight: FontWeight.w500,
+          ),
         ),
         const SizedBox(height: 24),
         TeamResultContent(result: result),
@@ -56,7 +59,7 @@ class _TeamCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Card(
-    margin: const EdgeInsets.only(bottom: 12),
+    margin: const EdgeInsets.only(bottom: 16),
     elevation: 0,
     color: Colors.white,
     surfaceTintColor: Colors.transparent,
@@ -72,13 +75,15 @@ class _TeamCard extends StatelessWidget {
             children: [
               Text(
                 '${team.number}팀',
-                style: Theme.of(context).textTheme.titleLarge
-                    ?.copyWith(fontWeight: FontWeight.bold),
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: const Color(0xFF1976D2),
+                  fontWeight: FontWeight.bold,
+                ),
               ),
               const SizedBox(height: 8),
               for (final participant in team.participants)
                 Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 4),
+                  padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Row(
                     children: [
                       Expanded(child: Text(_participantLabel(participant))),
@@ -117,6 +122,7 @@ class _TeamCard extends StatelessWidget {
                         '총점',
                         style: TextStyle(
                           color: Colors.black,
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -127,6 +133,7 @@ class _TeamCard extends StatelessWidget {
                         key: ValueKey('team-bonus-score-${team.number}'),
                         style: const TextStyle(
                           color: Color(0xFF1976D2),
+                          fontSize: 16,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
@@ -137,6 +144,7 @@ class _TeamCard extends StatelessWidget {
                       key: ValueKey('team-total-score-${team.number}'),
                       style: const TextStyle(
                         color: Colors.black,
+                        fontSize: 16,
                         fontWeight: FontWeight.bold,
                       ),
                     ),
@@ -162,3 +170,7 @@ String formatDateTime(DateTime value) =>
     '${value.day.toString().padLeft(2, '0')} '
     '${value.hour.toString().padLeft(2, '0')}:'
     '${value.minute.toString().padLeft(2, '0')}';
+
+String formatResultMetadata(TeamResult result) =>
+    '팀당 ${result.teamSize}명  ·  ${result.teams.length}팀  ·  '
+    '${formatDateTime(result.createdAt)}';

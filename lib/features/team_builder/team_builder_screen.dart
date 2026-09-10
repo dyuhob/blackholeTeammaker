@@ -11,11 +11,12 @@ import '../history/team_result_screen.dart';
 import 'team_builder_controller.dart';
 
 const _controlHeight = 48.0;
-const _compactCardHeight = 52.0;
-const _gridGap = 6.0;
+const _compactCardHeight = 36.0;
+const _gridGap = 8.0;
 const _focusedInputColor = Color(0xFF42A5F5);
-const _actionButtonSize = 36.0;
-const _actionIconSize = 20.0;
+const _guestBackgroundColor = Color(0xFFA7B9ED);
+const _actionButtonSize = 24.0;
+const _actionIconSize = 14.0;
 const _removeButtonSize = 24.0;
 const _removeIconSize = 14.0;
 
@@ -151,7 +152,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
               decoration: _inputDecoration('팀 편성 이름'),
             ),
           ),
-          const SizedBox(height: 8),
+          const SizedBox(height: 12),
           SizedBox(
             height: _controlHeight,
             child: Row(
@@ -171,7 +172,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     ),
                   ),
                 ),
-                const SizedBox(width: 8),
+                const SizedBox(width: 10),
                 Expanded(
                   flex: 2,
                   child: FilledButton.icon(
@@ -217,7 +218,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
               );
             },
           ),
-          const Divider(height: 17),
+          const Divider(height: 21),
           SizedBox(
             height: 32,
             child: Align(
@@ -249,7 +250,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                 );
               },
             ),
-          const SizedBox(height: 4),
+          const SizedBox(height: 8),
         ],
       );
     },
@@ -303,32 +304,30 @@ class _GuestAddCard extends StatelessWidget {
     key: const Key('guest-add-card'),
     margin: EdgeInsets.zero,
     elevation: 0,
-    color: Colors.white,
+    color: _guestBackgroundColor,
     surfaceTintColor: Colors.transparent,
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+    shape: RoundedRectangleBorder(
+      borderRadius: BorderRadius.circular(12),
+      side: BorderSide(color: Theme.of(context).colorScheme.primary, width: 1),
+    ),
     child: InkWell(
       borderRadius: BorderRadius.circular(12),
       onTap: onTap,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Text('게스트 추가', style: TextStyle(color: Colors.black)),
-          const SizedBox(width: 2),
-          SizedBox.square(
-            dimension: 28,
-            child: IconButton(
-              key: const Key('guest-add-icon'),
-              tooltip: '게스트 추가',
-              onPressed: onTap,
-              padding: EdgeInsets.zero,
-              iconSize: _actionIconSize,
-              style: IconButton.styleFrom(
-                tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-              ),
-              icon: const ImageIcon(
-                AssetImage(NavigationIconAssets.participantAdd),
-              ),
-            ),
+          const Text(
+            '게스트 추가',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(width: 6),
+          CircularAssetIconButton(
+            key: const Key('guest-add-icon'),
+            tooltip: '게스트 추가',
+            onPressed: onTap,
+            assetPath: NavigationIconAssets.participantAdd,
+            size: _actionButtonSize,
+            iconSize: _actionIconSize,
           ),
         ],
       ),
@@ -364,8 +363,8 @@ class _UnselectedMemberCard extends StatelessWidget {
           ),
           const SizedBox(width: 3),
           Text('${member.score}', style: const TextStyle(fontSize: 12)),
-          const SizedBox(width: 6),
-          BorderedAssetIconButton(
+          const SizedBox(width: 8),
+          CircularAssetIconButton(
             tooltip: '참가자에 추가',
             onPressed: onAdd,
             assetPath: NavigationIconAssets.participantAdd,
@@ -398,7 +397,7 @@ class _ParticipantCard extends StatelessWidget {
     surfaceTintColor: Colors.transparent,
     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
     child: Padding(
-      padding: const EdgeInsets.only(left: 9, right: 4),
+      padding: const EdgeInsets.only(left: 9, right: 8),
       child: Row(
         children: [
           Expanded(
@@ -414,31 +413,35 @@ class _ParticipantCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 3),
-          SizedBox(
-            width: 45,
-            height: 36,
-            child: TextFormField(
-              key: ValueKey('participant-score-${participant.id}'),
-              initialValue: '${participant.score}',
-              keyboardType: TextInputType.number,
-              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-              onChanged: onScoreChanged,
-              textAlign: TextAlign.center,
-              style: const TextStyle(fontSize: 12),
-              decoration: const InputDecoration(
-                isDense: true,
-                filled: true,
-                fillColor: Colors.white,
-                contentPadding: EdgeInsets.symmetric(
-                  horizontal: 4,
-                  vertical: 8,
+          Transform.translate(
+            offset: const Offset(0, 1),
+            child: Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: SizedBox(
+                width: 45,
+                height: 28,
+                child: TextFormField(
+                  key: ValueKey('participant-score-${participant.id}'),
+                  initialValue: '${participant.score}',
+                  keyboardType: TextInputType.number,
+                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                  onChanged: onScoreChanged,
+                  textAlign: TextAlign.center,
+                  textAlignVertical: const TextAlignVertical(y: 0.5),
+                  style: const TextStyle(fontSize: 12),
+                  decoration: const InputDecoration(
+                    isDense: true,
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: EdgeInsets.fromLTRB(4, 0, 4, 4),
+                    border: OutlineInputBorder(),
+                  ),
                 ),
-                border: OutlineInputBorder(),
               ),
             ),
           ),
-          const SizedBox(width: 6),
-          BorderedAssetIconButton(
+          const SizedBox(width: 8),
+          CircularAssetIconButton(
             tooltip: '참가자 제외',
             onPressed: onRemove,
             assetPath: NavigationIconAssets.participantRemove,

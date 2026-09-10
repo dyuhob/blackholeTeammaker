@@ -53,8 +53,7 @@ class HistoryScreen extends StatelessWidget {
                 ),
               ),
               subtitle: Text(
-                '팀당 ${result.teamSize}명 · ${result.teams.length}팀 · '
-                '${formatDateTime(result.createdAt)}',
+                formatResultMetadata(result),
                 style: const TextStyle(color: Color(0xFF6B7280)),
               ),
               onTap: () => Navigator.push(

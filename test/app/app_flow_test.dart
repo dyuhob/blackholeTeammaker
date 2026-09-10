@@ -119,7 +119,7 @@ void main() {
     await tester.tap(find.byKey(const Key('build-teams-button')));
     await tester.pumpAndSettle();
 
-    expect(find.text('팀당 1명 · 2팀 · 2026-09-09 20:30'), findsOneWidget);
+    expect(find.text('팀당 1명  ·  2팀  ·  2026-09-09 20:30'), findsOneWidget);
     final primaryColor = Theme.of(
       tester.element(find.byKey(const Key('save-result-button'))),
     ).colorScheme.primary;

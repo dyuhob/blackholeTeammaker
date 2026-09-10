@@ -187,10 +187,7 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          Text(
-            '팀당 ${_result.teamSize}명 · ${_result.teams.length}팀 · '
-            '${formatDateTime(_result.createdAt)}',
-          ),
+          Text(formatResultMetadata(_result)),
           const SizedBox(height: 16),
           TeamResultContent(result: _result),
         ],

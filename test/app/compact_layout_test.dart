@@ -68,8 +68,11 @@ void main() {
       find.byKey(const Key('participant-card-participant-2')),
     );
     expect(firstParticipant.top, secondParticipant.top);
-    expect(firstParticipant.right, lessThan(secondParticipant.left));
-    expect(firstParticipant.height, lessThanOrEqualTo(56));
+    expect(
+      secondParticipant.left - firstParticipant.right,
+      greaterThanOrEqualTo(8),
+    );
+    expect(firstParticipant.height, 36);
     expect(firstParticipant.width, closeTo(secondParticipant.width, 1));
 
     final guestAdd = tester.getRect(find.byKey(const Key('guest-add-card')));
@@ -78,14 +81,33 @@ void main() {
     );
     expect(guestAdd.top, firstUnselected.top);
     expect(guestAdd.width, closeTo(firstUnselected.width, 1));
-    expect(guestAdd.height, closeTo(firstUnselected.height, 1));
+    expect(guestAdd.height, 36);
+    expect(firstUnselected.height, 36);
+    final guestCard = tester.widget<Card>(
+      find.byKey(const Key('guest-add-card')),
+    );
+    expect(guestCard.color, const Color(0xFFA7B9ED));
+    final guestShape = guestCard.shape! as RoundedRectangleBorder;
+    expect(
+      guestShape.side.color,
+      Theme.of(tester.element(find.byKey(const Key('guest-add-card'))))
+          .colorScheme
+          .primary,
+    );
+    expect(guestShape.side.width, 1);
     expect(
       find.descendant(
         of: find.byKey(const Key('guest-add-card')),
-        matching: find.byType(BorderedAssetIconButton),
+        matching: find.byType(CircularAssetIconButton),
       ),
-      findsNothing,
+      findsOneWidget,
     );
+
+    final unselectedAddButton = find.descendant(
+      of: find.byKey(const Key('unselected-card-3')),
+      matching: find.byType(CircularAssetIconButton),
+    );
+    expect(tester.getSize(unselectedAddButton), const Size.square(24));
 
     expect(find.widgetWithText(TextButton, '전체 추가'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, '전체 추가'), findsNothing);
@@ -93,14 +115,28 @@ void main() {
     final removeButton = tester.getRect(
       find.descendant(
         of: find.byKey(const Key('participant-card-participant-1')),
-        matching: find.byType(BorderedAssetIconButton),
+        matching: find.byType(CircularAssetIconButton),
       ),
     );
     expect(removeButton.width, 24);
     expect(removeButton.height, 24);
     expect(
       firstParticipant.right - removeButton.right,
-      greaterThanOrEqualTo(4),
+      greaterThanOrEqualTo(8),
+    );
+    final circularButton = tester.widget<CircularAssetIconButton>(
+      find.descendant(
+        of: find.byKey(const Key('participant-card-participant-1')),
+        matching: find.byType(CircularAssetIconButton),
+      ),
+    );
+    expect(circularButton.backgroundColor, const Color(0xFFF3F4F6));
+    expect(
+      find.descendant(
+        of: find.byType(CircularAssetIconButton),
+        matching: find.byType(IconButton),
+      ),
+      findsNothing,
     );
 
     final teamSize = tester.getRect(find.byKey(const Key('team-size-control')));
@@ -150,8 +186,24 @@ void main() {
     );
     expect(
       memberScore.decoration.contentPadding,
-      const EdgeInsets.symmetric(horizontal: 8),
+      const EdgeInsets.fromLTRB(8, 0, 8, 8),
     );
+    final memberScoreField = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('member-score-1')),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(memberScoreField.textAlignVertical, const TextAlignVertical(y: 0.5));
+    expect(
+      tester.getSize(find.byKey(const Key('member-score-1'))),
+      const Size(76, 32),
+    );
+    final memberCard = tester.getRect(find.byKey(const Key('member-card-1')));
+    final trashButton = tester.getRect(find.byType(BorderedAssetIconButton));
+    expect(memberCard.right - trashButton.right, greaterThanOrEqualTo(8));
+    final scoreField = tester.getRect(find.byKey(const Key('member-score-1')));
+    expect(trashButton.left - scoreField.right, greaterThanOrEqualTo(8));
 
     final memberAppBar = tester.widget<AppBar>(find.byType(AppBar));
     final memberAppBarBorder = memberAppBar.shape! as Border;
@@ -168,6 +220,24 @@ void main() {
 
     await tester.tap(find.text('팀짜기').last);
     await tester.pumpAndSettle();
+    final participantScoreField = tester.widget<TextField>(
+      find.descendant(
+        of: find.byKey(const Key('participant-score-participant-1')),
+        matching: find.byType(TextField),
+      ),
+    );
+    expect(
+      participantScoreField.textAlignVertical,
+      const TextAlignVertical(y: 0.5),
+    );
+    expect(
+      participantScoreField.decoration?.contentPadding,
+      const EdgeInsets.fromLTRB(4, 0, 4, 4),
+    );
+    expect(
+      tester.getSize(find.byKey(const Key('participant-score-participant-1'))),
+      const Size(45, 28),
+    );
     final topControlHeight = tester
         .getRect(find.byKey(const Key('team-size-control')))
         .height;
@@ -276,5 +346,10 @@ void main() {
       find.byKey(const Key('team-result-export-background')),
     );
     expect(background.color, const Color(0xFFF3F4F6));
+    final metadata = tester.widget<Text>(
+      find.byKey(const Key('team-result-export-metadata')),
+    );
+    expect(metadata.style?.color, const Color(0xFF1976D2));
+    expect(metadata.data, contains('  ·  '));
   });
 }

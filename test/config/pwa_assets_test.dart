@@ -22,7 +22,12 @@ void main() {
     final icons = manifest['icons']! as List<Object?>;
     expect(
       icons.whereType<Map<String, Object?>>().map((icon) => icon['src']),
-      everyElement(endsWith('?v=4')),
+      containsAll([
+        'icons/Icon-192-v5.png',
+        'icons/Icon-512-v5.png',
+        'icons/Icon-maskable-192-v5.png',
+        'icons/Icon-maskable-512-v5.png',
+      ]),
     );
     expect(
       icons.whereType<Map<String, Object?>>().map((icon) => icon['sizes']),
@@ -46,7 +51,8 @@ void main() {
       ),
     );
     expect(index, contains('href="manifest.json"'));
-    expect(index, contains('href="icons/Icon-192.png?v=4"'));
+    expect(index, contains('href="icons/Icon-192-v5.png"'));
+    expect(index, contains('href="favicon-v5.png"'));
     expect(index, contains('src="flutter_bootstrap.js"'));
     expect(index, contains("register('/service_worker.js', {"));
     expect(index, contains("updateViaCache: 'none'"));
@@ -62,9 +68,9 @@ void main() {
     () {
       final worker = File('web/service_worker.js').readAsStringSync();
 
-      expect(worker, contains("const CACHE_NAME = 'team-maker-v4'"));
-      expect(worker, contains("'/icons/Icon-192.png?v=4'"));
-      expect(worker, contains("'/icons/Icon-512.png?v=4'"));
+      expect(worker, contains("const CACHE_NAME = 'team-maker-v5'"));
+      expect(worker, contains("'/icons/Icon-192-v5.png'"));
+      expect(worker, contains("'/icons/Icon-512-v5.png'"));
       expect(worker, contains("addEventListener('install'"));
       expect(worker, contains('skipWaiting()'));
       expect(worker, contains("addEventListener('activate'"));
@@ -82,14 +88,14 @@ void main() {
   );
 
   test('PWA icons have their declared PNG dimensions', () {
-    expect(pngSize('web/favicon.png'), (width: 48, height: 48));
-    expect(pngSize('web/icons/Icon-192.png'), (width: 192, height: 192));
-    expect(pngSize('web/icons/Icon-512.png'), (width: 512, height: 512));
-    expect(pngSize('web/icons/Icon-maskable-192.png'), (
+    expect(pngSize('web/favicon-v5.png'), (width: 48, height: 48));
+    expect(pngSize('web/icons/Icon-192-v5.png'), (width: 192, height: 192));
+    expect(pngSize('web/icons/Icon-512-v5.png'), (width: 512, height: 512));
+    expect(pngSize('web/icons/Icon-maskable-192-v5.png'), (
       width: 192,
       height: 192,
     ));
-    expect(pngSize('web/icons/Icon-maskable-512.png'), (
+    expect(pngSize('web/icons/Icon-maskable-512-v5.png'), (
       width: 512,
       height: 512,
     ));

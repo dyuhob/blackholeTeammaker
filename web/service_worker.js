@@ -1,15 +1,15 @@
-const CACHE_NAME = 'team-maker-v4';
+const CACHE_NAME = 'team-maker-v5';
 const CORE_ASSETS = [
   '/',
   '/index.html',
   '/manifest.json',
   '/flutter_bootstrap.js',
   '/main.dart.js',
-  '/favicon.png?v=4',
-  '/icons/Icon-192.png?v=4',
-  '/icons/Icon-512.png?v=4',
-  '/icons/Icon-maskable-192.png?v=4',
-  '/icons/Icon-maskable-512.png?v=4',
+  '/favicon-v5.png',
+  '/icons/Icon-192-v5.png',
+  '/icons/Icon-512-v5.png',
+  '/icons/Icon-maskable-192-v5.png',
+  '/icons/Icon-maskable-512-v5.png',
   '/assets/AssetManifest.bin',
   '/assets/FontManifest.json',
   '/assets/fonts/MaterialIcons-Regular.otf',

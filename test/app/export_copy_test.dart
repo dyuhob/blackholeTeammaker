@@ -16,7 +16,7 @@ void main() {
     addTearDown(historyController.dispose);
     final exporter = MemoryGalleryExporter(
       actionLabel: '이미지 다운로드',
-      busyLabel: '다운로드 준비 중…',
+      busyLabel: '준비 중…',
       successMessage: '이미지를 다운로드했습니다.',
       failureMessage: '이미지를 다운로드하지 못했습니다.',
     );

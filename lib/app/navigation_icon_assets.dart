@@ -74,3 +74,47 @@ class BorderedAssetIconButton extends StatelessWidget {
     ),
   );
 }
+
+class CircularAssetIconButton extends StatelessWidget {
+  const CircularAssetIconButton({
+    super.key,
+    required this.assetPath,
+    required this.tooltip,
+    required this.onPressed,
+    this.size = 24,
+    this.iconSize = 14,
+    this.backgroundColor = const Color(0xFFF3F4F6),
+  });
+
+  final String assetPath;
+  final String tooltip;
+  final VoidCallback? onPressed;
+  final double size;
+  final double iconSize;
+  final Color backgroundColor;
+
+  @override
+  Widget build(BuildContext context) => Tooltip(
+    message: tooltip,
+    child: SizedBox.square(
+      dimension: size,
+      child: Material(
+        color: backgroundColor,
+        surfaceTintColor: Colors.transparent,
+        shape: const CircleBorder(),
+        clipBehavior: Clip.antiAlias,
+        child: InkWell(
+          onTap: onPressed,
+          customBorder: const CircleBorder(),
+          child: Center(
+            child: ImageIcon(
+              AssetImage(assetPath),
+              size: iconSize,
+              color: onPressed == null ? Colors.black38 : Colors.black,
+            ),
+          ),
+        ),
+      ),
+    ),
+  );
+}
