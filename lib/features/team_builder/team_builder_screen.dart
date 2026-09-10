@@ -11,7 +11,7 @@ import '../history/team_result_screen.dart';
 import 'team_builder_controller.dart';
 
 const _controlHeight = 48.0;
-const _compactCardHeight = 36.0;
+const _compactCardHeight = 46.8;
 const _gridGap = 8.0;
 const _focusedInputColor = Color(0xFF42A5F5);
 const _guestBackgroundColor = Color(0xFFA7B9ED);
@@ -413,27 +413,24 @@ class _ParticipantCard extends StatelessWidget {
             ),
           ),
           const SizedBox(width: 3),
-          Transform.translate(
-            offset: const Offset(0, 2),
-            child: SizedBox(
-              width: 45,
-              height: 32,
-              child: TextFormField(
-                key: ValueKey('participant-score-${participant.id}'),
-                initialValue: '${participant.score}',
-                keyboardType: TextInputType.number,
-                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                onChanged: onScoreChanged,
-                textAlign: TextAlign.center,
-                textAlignVertical: TextAlignVertical.center,
-                style: const TextStyle(fontSize: 12),
-                decoration: const InputDecoration(
-                  isDense: true,
-                  filled: true,
-                  fillColor: Colors.white,
-                  contentPadding: EdgeInsets.symmetric(horizontal: 4),
-                  border: OutlineInputBorder(),
-                ),
+          SizedBox(
+            width: 45,
+            height: 41.6,
+            child: TextFormField(
+              key: ValueKey('participant-score-${participant.id}'),
+              initialValue: '${participant.score}',
+              keyboardType: TextInputType.number,
+              inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+              onChanged: onScoreChanged,
+              textAlign: TextAlign.center,
+              textAlignVertical: TextAlignVertical.center,
+              style: const TextStyle(fontSize: 12),
+              decoration: const InputDecoration(
+                isDense: true,
+                filled: true,
+                fillColor: Colors.white,
+                contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                border: OutlineInputBorder(),
               ),
             ),
           ),
