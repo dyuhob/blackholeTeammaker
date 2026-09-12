@@ -27,9 +27,14 @@ void main() {
     await tester.pumpAndSettle();
   }
 
-  testWidgets('club member score input uses asymmetric vertical spacing', (
+  testWidgets('club member score border is vertically centered on mobile', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     await pumpApp(tester);
 
     expect(find.text('클럽원 관리'), findsWidgets);
@@ -66,12 +71,15 @@ void main() {
       find.byKey(const ValueKey('member-score-label-id-0')),
     );
     final editor = tester.getRect(
-      find.byKey(const ValueKey('member-score-id-0')),
+      find.descendant(
+        of: find.byKey(const ValueKey('member-score-id-0')),
+        matching: find.byType(InputDecorator),
+      ),
     );
     final card = tester.getRect(find.byKey(const ValueKey('member-card-id-0')));
     expect(label.right, lessThan(editor.left));
-    expect(editor.top - card.top, closeTo(2, 0.1));
-    expect(card.bottom - editor.bottom, closeTo(2, 0.1));
+    expect(editor.top - card.top, closeTo(4, 0.1));
+    expect(card.bottom - editor.bottom, closeTo(4, 0.1));
   });
 
   testWidgets('temporary club member dialog enforces score range', (

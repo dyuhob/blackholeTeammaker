@@ -41,6 +41,11 @@ void main() {
   testWidgets('team builder uses compact two-column member grids', (
     tester,
   ) async {
+    tester.view.physicalSize = const Size(1080, 1920);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
     final controller = createController();
     addTearDown(controller.dispose);
     final history = HistoryController(MemoryHistoryRepository());
@@ -75,12 +80,15 @@ void main() {
     expect(firstParticipant.height, 36);
     expect(firstParticipant.width, closeTo(secondParticipant.width, 1));
     final firstParticipantScore = tester.getRect(
-      find.byKey(const Key('participant-score-participant-1')),
+      find.descendant(
+        of: find.byKey(const Key('participant-score-participant-1')),
+        matching: find.byType(InputDecorator),
+      ),
     );
-    expect(firstParticipantScore.top - firstParticipant.top, closeTo(1, 0.1));
+    expect(firstParticipantScore.top - firstParticipant.top, closeTo(2, 0.1));
     expect(
       firstParticipant.bottom - firstParticipantScore.bottom,
-      closeTo(1, 0.1),
+      closeTo(2, 0.1),
     );
 
     final guestAdd = tester.getRect(find.byKey(const Key('guest-add-card')));
@@ -207,7 +215,7 @@ void main() {
     expect(memberScoreField.textAlignVertical, TextAlignVertical.center);
     expect(
       tester.getSize(find.byKey(const Key('member-score-1'))),
-      const Size(76, 44),
+      const Size(76, 40),
     );
     final memberCard = tester.getRect(find.byKey(const Key('member-card-1')));
     final trashButton = tester.getRect(find.byType(BorderedAssetIconButton));
@@ -243,7 +251,7 @@ void main() {
     );
     expect(
       tester.getSize(find.byKey(const Key('participant-score-participant-1'))),
-      const Size(45, 34),
+      const Size(45, 32),
     );
     final topControlHeight = tester
         .getRect(find.byKey(const Key('team-size-control')))
