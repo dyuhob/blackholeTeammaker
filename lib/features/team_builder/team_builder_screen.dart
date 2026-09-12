@@ -419,10 +419,13 @@ class _ParticipantCard extends StatelessWidget {
             child: Center(
               child: SizedBox(
                 width: 45,
-                height: 32,
+                height: 24,
                 child: TextFormField(
                   key: ValueKey('participant-score-${participant.id}'),
                   initialValue: '${participant.score}',
+                  minLines: null,
+                  maxLines: null,
+                  expands: true,
                   keyboardType: TextInputType.number,
                   inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                   onChanged: onScoreChanged,
@@ -433,7 +436,10 @@ class _ParticipantCard extends StatelessWidget {
                     isDense: true,
                     filled: true,
                     fillColor: Colors.white,
-                    contentPadding: EdgeInsets.symmetric(horizontal: 4),
+                    contentPadding: EdgeInsets.symmetric(
+                      horizontal: 4,
+                      vertical: 3,
+                    ),
                     border: OutlineInputBorder(),
                   ),
                 ),

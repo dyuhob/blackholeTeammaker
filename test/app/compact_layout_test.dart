@@ -17,6 +17,15 @@ import 'package:team_maker/features/team_builder/team_builder_screen.dart';
 import '../support/memory_repositories.dart';
 
 void main() {
+  Rect inputBorderRect(WidgetTester tester, Finder field) {
+    final editableText = find.descendant(
+      of: field,
+      matching: find.byType(EditableText),
+    );
+    final container = InputDecorator.containerOf(tester.element(editableText))!;
+    return container.localToGlobal(Offset.zero) & container.size;
+  }
+
   TeamBuilderController createController() {
     var nextId = 0;
     final controller = TeamBuilderController(
@@ -79,16 +88,14 @@ void main() {
     );
     expect(firstParticipant.height, 36);
     expect(firstParticipant.width, closeTo(secondParticipant.width, 1));
-    final firstParticipantScore = tester.getRect(
-      find.descendant(
-        of: find.byKey(const Key('participant-score-participant-1')),
-        matching: find.byType(InputDecorator),
-      ),
+    final firstParticipantScore = inputBorderRect(
+      tester,
+      find.byKey(const Key('participant-score-participant-1')),
     );
-    expect(firstParticipantScore.top - firstParticipant.top, closeTo(2, 0.1));
+    expect(firstParticipantScore.height, closeTo(24, 0.1));
     expect(
-      firstParticipant.bottom - firstParticipantScore.bottom,
-      closeTo(2, 0.1),
+      firstParticipantScore.center.dy,
+      closeTo(firstParticipant.center.dy, 0.1),
     );
 
     final guestAdd = tester.getRect(find.byKey(const Key('guest-add-card')));
@@ -204,7 +211,7 @@ void main() {
     );
     expect(
       memberScore.decoration.contentPadding,
-      const EdgeInsets.symmetric(horizontal: 8),
+      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
     );
     final memberScoreField = tester.widget<TextField>(
       find.descendant(
@@ -213,11 +220,18 @@ void main() {
       ),
     );
     expect(memberScoreField.textAlignVertical, TextAlignVertical.center);
+    expect(memberScoreField.expands, isTrue);
     expect(
       tester.getSize(find.byKey(const Key('member-score-1'))),
-      const Size(76, 40),
+      const Size(76, 32),
     );
     final memberCard = tester.getRect(find.byKey(const Key('member-card-1')));
+    final memberScoreBorder = inputBorderRect(
+      tester,
+      find.byKey(const Key('member-score-1')),
+    );
+    expect(memberScoreBorder.height, closeTo(32, 0.1));
+    expect(memberScoreBorder.center.dy, closeTo(memberCard.center.dy, 0.1));
     final trashButton = tester.getRect(find.byType(BorderedAssetIconButton));
     expect(memberCard.right - trashButton.right, greaterThanOrEqualTo(8));
     final scoreField = tester.getRect(find.byKey(const Key('member-score-1')));
@@ -245,13 +259,14 @@ void main() {
       ),
     );
     expect(participantScoreField.textAlignVertical, TextAlignVertical.center);
+    expect(participantScoreField.expands, isTrue);
     expect(
       participantScoreField.decoration?.contentPadding,
-      const EdgeInsets.symmetric(horizontal: 4),
+      const EdgeInsets.symmetric(horizontal: 4, vertical: 3),
     );
     expect(
       tester.getSize(find.byKey(const Key('participant-score-participant-1'))),
-      const Size(45, 32),
+      const Size(45, 24),
     );
     final topControlHeight = tester
         .getRect(find.byKey(const Key('team-size-control')))

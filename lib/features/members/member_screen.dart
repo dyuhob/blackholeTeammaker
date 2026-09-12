@@ -194,12 +194,15 @@ class _MemberScreenState extends State<MemberScreen> {
                                     child: Center(
                                       child: SizedBox(
                                         width: 76,
-                                        height: 40,
+                                        height: 32,
                                         child: TextFormField(
                                           key: ValueKey(
                                             'member-score-${member.id}',
                                           ),
                                           initialValue: '${member.score}',
+                                          minLines: null,
+                                          maxLines: null,
+                                          expands: true,
                                           keyboardType: TextInputType.number,
                                           inputFormatters: [
                                             FilteringTextInputFormatter
@@ -236,6 +239,7 @@ class _MemberScreenState extends State<MemberScreen> {
                                             contentPadding:
                                                 const EdgeInsets.symmetric(
                                                   horizontal: 8,
+                                                  vertical: 4,
                                                 ),
                                             border: const OutlineInputBorder(),
                                             enabledBorder: OutlineInputBorder(
