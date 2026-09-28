@@ -10,10 +10,18 @@ class TeamResultContent extends StatelessWidget {
   final TeamResult result;
 
   @override
-  Widget build(BuildContext context) => Column(
-    crossAxisAlignment: CrossAxisAlignment.stretch,
-    children: [for (final team in result.teams) _TeamCard(team: team)],
-  );
+  Widget build(BuildContext context) {
+    final cards = <Widget>[];
+    var startNumber = 1;
+    for (final team in result.teams) {
+      cards.add(_TeamCard(team: team, startNumber: startNumber));
+      startNumber += team.participants.length;
+    }
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: cards,
+    );
+  }
 }
 
 class TeamResultExportWidget extends StatelessWidget {
@@ -53,9 +61,10 @@ class TeamResultExportWidget extends StatelessWidget {
 }
 
 class _TeamCard extends StatelessWidget {
-  const _TeamCard({required this.team});
+  const _TeamCard({required this.team, required this.startNumber});
 
   final Team team;
+  final int startNumber;
 
   @override
   Widget build(BuildContext context) => Card(
@@ -81,11 +90,19 @@ class _TeamCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              for (final participant in team.participants)
+              for (final (index, participant) in team.participants.indexed)
                 Padding(
                   padding: const EdgeInsets.symmetric(vertical: 6),
                   child: Row(
                     children: [
+                      Text(
+                        '${startNumber + index}',
+                        style: const TextStyle(
+                          color: Color(0xFF1976D2),
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
                       Expanded(child: Text(_participantLabel(participant))),
                       Text('${participant.score}'),
                     ],
