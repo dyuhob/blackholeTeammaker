@@ -308,7 +308,7 @@ void main() {
               type: ParticipantType.regular,
             ),
           ],
-          bonusScore: 15,
+          bonusScore: -15,
         ),
       ],
     );
@@ -318,6 +318,8 @@ void main() {
       ),
     );
 
+    expect(find.text('-15'), findsOneWidget);
+    expect(find.text('+15'), findsNothing);
     final panel = tester.widget<Container>(
       find.byKey(const Key('team-total-panel-1')),
     );

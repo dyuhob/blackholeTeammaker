@@ -144,9 +144,9 @@ class _TeamCard extends StatelessWidget {
                         ),
                       ),
                     ),
-                    if (team.bonusScore > 0) ...[
+                    if (team.bonusScore != 0) ...[
                       Text(
-                        '+${team.bonusScore}',
+                        '${team.bonusScore > 0 ? '+' : ''}${team.bonusScore}',
                         key: ValueKey('team-bonus-score-${team.number}'),
                         style: const TextStyle(
                           color: Color(0xFF1976D2),

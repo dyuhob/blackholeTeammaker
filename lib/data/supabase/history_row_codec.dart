@@ -8,10 +8,10 @@ Map<String, Object?> teamResultToRemotePayload(TeamResult result) => {
   'created_at': result.createdAt.toUtc().toIso8601String(),
   'group_count': result.teams.length,
   'group_size': result.teamSize,
-  'highest_average': result.teams.fold<int>(
-    0,
-    (highest, team) => team.rawScore > highest ? team.rawScore : highest,
-  ),
+  // The legacy column stores the target score for both bonus and deduction games.
+  'highest_average': result.teams.isEmpty
+      ? 0
+      : result.teams.first.effectiveScore,
   'participants': [
     for (final team in result.teams)
       for (final participant in team.participants)
@@ -35,7 +35,7 @@ TeamResult teamResultFromRemoteRows(
   Map<String, Object?> game,
   List<Map<String, Object?>> participantRows,
 ) {
-  final highestScore = (game['highest_average']! as num).toInt();
+  final targetScore = (game['highest_average']! as num).toInt();
   final byTeam = <int, List<Participant>>{};
   for (final row in participantRows) {
     if (row['deleted_at'] != null) continue;
@@ -76,7 +76,7 @@ TeamResult teamResultFromRemoteRows(
               number: entry.key,
               participants: entry.value,
               bonusScore:
-                  highestScore -
+                  targetScore -
                   entry.value.fold<int>(0, (sum, value) => sum + value.score),
             ),
           )

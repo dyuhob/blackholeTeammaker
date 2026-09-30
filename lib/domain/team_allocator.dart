@@ -92,25 +92,22 @@ class TeamAllocator {
 
   List<Team> compensateScores(List<Team> teams) {
     if (teams.isEmpty) return const [];
-    final targetScore = teams.map((team) => team.rawScore).reduce(max);
+    final targetScore = teams.map((team) => team.rawScore).reduce(min);
 
     return teams
-        .map(
-          (team) =>
-              team.copyWith(bonusScore: max(0, targetScore - team.rawScore)),
-        )
+        .map((team) => team.copyWith(bonusScore: targetScore - team.rawScore))
         .toList();
   }
 
   List<Team> _orderTeamsForDisplay(List<Team> teams) {
     if (teams.isEmpty) return const [];
     final shuffled = [...teams]..shuffle(_random);
-    final highestScore = shuffled.map((team) => team.rawScore).reduce(max);
-    final highestIndex = shuffled.indexWhere(
-      (team) => team.rawScore == highestScore,
+    final lowestScore = shuffled.map((team) => team.rawScore).reduce(min);
+    final lowestIndex = shuffled.indexWhere(
+      (team) => team.rawScore == lowestScore,
     );
-    final highest = shuffled.removeAt(highestIndex);
-    final ordered = [highest, ...shuffled];
+    final lowest = shuffled.removeAt(lowestIndex);
+    final ordered = [lowest, ...shuffled];
     return [
       for (var index = 0; index < ordered.length; index++)
         ordered[index].copyWith(number: index + 1),

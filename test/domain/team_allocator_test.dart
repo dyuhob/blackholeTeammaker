@@ -75,7 +75,7 @@ void main() {
     expect(teams.map((team) => team.number), [1, 2, 3]);
     expect(
       teams.first.rawScore,
-      teams.map((team) => team.rawScore).reduce(max),
+      teams.map((team) => team.rawScore).reduce(min),
     );
     for (final team in teams) {
       final automaticStart = team.participants.indexWhere(
@@ -105,47 +105,38 @@ void main() {
     }
   });
 
-  test(
-    'score compensation reaches the highest score and shows full-team gap',
-    () {
-      final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
-      final teams = [
-        Team(
-          number: 1,
-          participants: [
-            regular('a', 180),
-            regular('b', 160),
-            manual('m', 150),
-          ],
-        ),
-        Team(
-          number: 2,
-          participants: [regular('c', 190), regular('d', 140), automatic('x')],
-        ),
-        Team(
-          number: 3,
-          participants: [
-            regular('e', 175),
-            regular('f', 155),
-            regular('g', 145),
-          ],
-        ),
-      ];
+  test('score compensation deducts the full-team gap to the lowest score', () {
+    final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
+    final teams = [
+      Team(
+        number: 1,
+        participants: [regular('a', 180), regular('b', 160), manual('m', 150)],
+      ),
+      Team(
+        number: 2,
+        participants: [regular('c', 190), regular('d', 140), automatic('x')],
+      ),
+      Team(
+        number: 3,
+        participants: [regular('e', 175), regular('f', 155), regular('g', 145)],
+      ),
+    ];
 
-      final balanced = allocator.compensateScores(teams);
+    final balanced = allocator.compensateScores(teams);
 
-      expect(balanced[0].rawScore, 490);
-      expect(balanced[0].bonusScore, 0);
-      expect(
-        balanced[1].participants.last.score,
-        160,
-        reason: 'the automatic member must close the 160 point gap',
-      );
-      expect(balanced[1].rawScore, 490);
-      expect(balanced[2].rawScore, 475);
-      expect(balanced[2].bonusScore, 15);
-    },
-  );
+    expect(balanced[0].rawScore, 490);
+    expect(balanced[0].bonusScore, -15);
+    expect(
+      balanced[1].participants.last.score,
+      160,
+      reason: 'automatic participant scores must stay at 160',
+    );
+    expect(balanced[1].rawScore, 490);
+    expect(balanced[2].rawScore, 475);
+    expect(balanced[1].bonusScore, -15);
+    expect(balanced[2].bonusScore, 0);
+    expect(balanced.map((team) => team.effectiveScore), [475, 475, 475]);
+  });
 
   test(
     'automatic participant scores stay at 160 and remaining gap is shown',
@@ -164,7 +155,9 @@ void main() {
         balanced[1].participants.map((participant) => participant.score),
         orderedEquals([160, 160]),
       );
-      expect(balanced[1].bonusScore, 131);
+      expect(balanced[0].bonusScore, -131);
+      expect(balanced[1].bonusScore, 0);
+      expect(balanced.map((team) => team.effectiveScore), [320, 320]);
     },
   );
 
@@ -187,7 +180,8 @@ void main() {
       balanced[1].participants.map((participant) => participant.score),
       orderedEquals([160, 160]),
     );
-    expect(balanced[1].bonusScore, 380);
-    expect(balanced[1].effectiveScore, 700);
+    expect(balanced[0].bonusScore, -380);
+    expect(balanced[1].bonusScore, 0);
+    expect(balanced.map((team) => team.effectiveScore), [320, 320]);
   });
 }
