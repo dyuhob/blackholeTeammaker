@@ -185,6 +185,10 @@ void main() {
       '입력 중 이름',
     );
     await tester.enterText(find.byKey(const Key('member-score-input')), '155');
+    await tester.tap(find.byKey(const Key('member-gender-input')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('W').last);
+    await tester.pumpAndSettle();
 
     await tester.tap(find.text('팀짜기').last);
     await tester.pumpAndSettle();
@@ -243,6 +247,13 @@ void main() {
           .controller
           ?.text,
       '155',
+    );
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('member-gender-input')),
+        matching: find.text('W'),
+      ),
+      findsOneWidget,
     );
   });
 }

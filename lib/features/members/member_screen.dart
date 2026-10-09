@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 
 import '../../app/navigation_icon_assets.dart';
 import '../../domain/manual_score.dart';
+import '../../domain/member.dart';
 import 'member_controller.dart';
 
 const _controlHeight = 48.0;
@@ -60,7 +61,11 @@ class _MemberScreenState extends State<MemberScreen> {
       _showMessage('이름과 90~200 사이의 점수를 입력해 주세요.');
       return;
     }
-    widget.controller.addMember(_nameController.text, score);
+    widget.controller.addMember(
+      _nameController.text,
+      score,
+      gender: widget.controller.pendingGender,
+    );
     widget.controller.clearPendingMember();
     _nameController.clear();
     _scoreController.clear();
@@ -113,6 +118,28 @@ class _MemberScreenState extends State<MemberScreen> {
                           widget.controller.pendingName = value,
                       textInputAction: TextInputAction.next,
                       decoration: _inputDecoration('클럽원 이름'),
+                    ),
+                  ),
+                  const SizedBox(width: 10),
+                  SizedBox(
+                    key: const Key('member-gender-input'),
+                    width: 64,
+                    child: DropdownButtonFormField<MemberGender>(
+                      key: ValueKey(widget.controller.pendingGender),
+                      initialValue: widget.controller.pendingGender,
+                      isExpanded: true,
+                      decoration: _inputDecoration('성별').copyWith(
+                        contentPadding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 12,
+                        ),
+                      ),
+                      items: _genderItems(),
+                      onChanged: (value) {
+                        if (value != null) {
+                          widget.controller.pendingGender = value;
+                        }
+                      },
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -177,6 +204,27 @@ class _MemberScreenState extends State<MemberScreen> {
                                       ),
                                     ),
                                   ),
+                                  SizedBox(
+                                    width: 48,
+                                    child: DropdownButton<MemberGender>(
+                                      key: ValueKey(
+                                        'member-gender-${member.id}',
+                                      ),
+                                      value: member.gender,
+                                      isExpanded: true,
+                                      underline: const SizedBox.shrink(),
+                                      items: _genderItems(),
+                                      onChanged: (value) {
+                                        if (value != null) {
+                                          widget.controller.updateGender(
+                                            member.id,
+                                            value,
+                                          );
+                                        }
+                                      },
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
                                   Text(
                                     '에버리지',
                                     key: ValueKey(
@@ -311,3 +359,8 @@ InputDecoration _inputDecoration(String label) => InputDecoration(
     borderSide: BorderSide(color: Color(0xFF42A5F5), width: 2),
   ),
 );
+
+List<DropdownMenuItem<MemberGender>> _genderItems() => [
+  for (final gender in MemberGender.values)
+    DropdownMenuItem(value: gender, child: Text(gender.label)),
+];

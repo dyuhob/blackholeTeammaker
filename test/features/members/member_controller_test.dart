@@ -46,6 +46,43 @@ void main() {
     ]);
   });
 
+  test('member gender can be added and edited in the draft roster', () async {
+    final controller = MemberController(
+      repository: MemoryMemberRepository([]),
+      idFactory: () => 'female',
+    );
+    await controller.initialize();
+
+    controller.addMember('여성 회원', 180, gender: MemberGender.female);
+    expect(controller.draftMembers.single.gender, MemberGender.female);
+
+    controller.updateGender('female', MemberGender.male);
+    expect(controller.draftMembers.single.gender, MemberGender.male);
+    expect(controller.hasUnsavedChanges, isTrue);
+  });
+
+  test(
+    'pending member gender restores and resets to male after clearing',
+    () async {
+      final controller = MemberController(
+        repository: MemoryMemberRepository([]),
+        idFactory: () => 'unused',
+      );
+      await controller.initialize();
+
+      controller.restoreWorkspace(
+        draftMembers: const [],
+        pendingName: '입력 중',
+        pendingScore: '170',
+        pendingGender: MemberGender.female,
+      );
+      expect(controller.pendingGender, MemberGender.female);
+
+      controller.clearPendingMember();
+      expect(controller.pendingGender, MemberGender.male);
+    },
+  );
+
   test('restored unfinished roster is name-sorted', () async {
     final controller = MemberController(
       repository: MemoryMemberRepository([]),

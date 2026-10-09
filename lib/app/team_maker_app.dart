@@ -105,6 +105,7 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
           draftMembers: workspace.draftMembers,
           pendingName: workspace.pendingMemberName,
           pendingScore: workspace.pendingMemberScore,
+          pendingGender: workspace.pendingMemberGender,
         );
         _teamBuilderController.restoreWorkspace(
           participants: workspace.participants,
@@ -283,6 +284,7 @@ class _TeamMakerAppState extends State<TeamMakerApp> {
       draftMembers: _memberController.draftMembers,
       pendingMemberName: _memberController.pendingName,
       pendingMemberScore: _memberController.pendingScore,
+      pendingMemberGender: _memberController.pendingGender,
       participants: _teamBuilderController.participants,
       teamSizeInput: _teamBuilderController.teamSizeInput,
       title: _teamBuilderController.title,

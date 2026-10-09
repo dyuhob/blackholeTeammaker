@@ -7,13 +7,19 @@ import 'package:team_maker/domain/team.dart';
 import 'package:team_maker/domain/team_result.dart';
 
 void main() {
-  test('member codec maps score to user average', () {
-    final member = Member(id: 'member-1', name: '김회원', score: 180);
+  test('member codec maps score and gender to remote columns', () {
+    final member = Member(
+      id: 'member-1',
+      name: '김회원',
+      score: 180,
+      gender: MemberGender.female,
+    );
 
     expect(memberToRemoteRow(member), {
       'id': 'member-1',
       'name': '김회원',
       'average': 180,
+      'gender': 1,
       'deleted_at': null,
     });
     expect(
@@ -21,6 +27,7 @@ void main() {
         'id': 'member-1',
         'name': '김회원',
         'average': 180,
+        'gender': 1,
         'deleted_at': null,
       }),
       member,

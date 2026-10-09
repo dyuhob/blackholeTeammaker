@@ -28,7 +28,7 @@ void main() {
       id: 'upsert:member-1',
       entityId: 'member-1',
       kind: SyncMutationKind.upsert,
-      payload: {'id': 'member-1', 'name': '회원', 'score': 180},
+      payload: {'id': 'member-1', 'name': '회원', 'score': 180, 'gender': 1},
     );
 
     await source.push(mutation);
@@ -37,7 +37,9 @@ void main() {
     expect(requests, hasLength(2));
     expect(requests[0].method, 'POST');
     expect(requests[0].url.path, '/rest/v1/member');
+    expect(jsonDecode(requests[0].body), containsPair('gender', 1));
     expect(requests[1].method, 'GET');
     expect(requests[1].url.path, '/rest/v1/member');
+    expect(requests[1].url.queryParameters['select'], contains('gender'));
   });
 }

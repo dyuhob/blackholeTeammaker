@@ -82,6 +82,44 @@ void main() {
     expect(card.bottom - editor.bottom, closeTo(8, 0.1));
   });
 
+  testWidgets('member gender defaults to M and can be added and edited', (
+    tester,
+  ) async {
+    await pumpApp(tester);
+
+    expect(
+      find.descendant(
+        of: find.byKey(const Key('member-gender-input')),
+        matching: find.text('M'),
+      ),
+      findsOneWidget,
+    );
+    await tester.tap(find.byKey(const Key('member-gender-input')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('W').last);
+    await tester.enterText(find.byKey(const Key('member-name-input')), '여성');
+    await tester.enterText(find.byKey(const Key('member-score-input')), '180');
+    await tester.tap(find.widgetWithText(FilledButton, '추가'));
+    await tester.pumpAndSettle();
+
+    final savedGender = find.byKey(const ValueKey('member-gender-id-0'));
+    expect(savedGender, findsOneWidget);
+    expect(
+      tester.widget<DropdownButton<MemberGender>>(savedGender).value,
+      MemberGender.female,
+    );
+
+    await tester.tap(savedGender);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('M').last);
+    await tester.pumpAndSettle();
+    expect(
+      tester.widget<DropdownButton<MemberGender>>(savedGender).value,
+      MemberGender.male,
+    );
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('temporary club member dialog enforces score range', (
     tester,
   ) async {

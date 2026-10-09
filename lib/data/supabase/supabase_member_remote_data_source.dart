@@ -30,7 +30,7 @@ class SupabaseMemberRemoteDataSource implements MemberRemoteDataSource {
   Future<List<Member>> fetchAll() async {
     final response = await _client
         .from('member')
-        .select('id,name,average,deleted_at')
+        .select('id,name,average,gender,deleted_at')
         .isFilter('deleted_at', null);
     return response
         .map((row) => memberFromRemoteRow(Map<String, Object?>.from(row)))
