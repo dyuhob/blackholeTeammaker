@@ -22,6 +22,7 @@ class TeamBuilderController extends ChangeNotifier {
   String _teamSizeInput = '3';
   String _title = '';
   TeamAllocationMode _allocationMode = TeamAllocationMode.random;
+  bool _femaleHandicapEnabled = false;
   TeamResult? _currentResult;
   bool _isCurrentResultSaved = false;
 
@@ -40,6 +41,7 @@ class TeamBuilderController extends ChangeNotifier {
   String get teamSizeInput => _teamSizeInput;
   String get title => _title;
   TeamAllocationMode get allocationMode => _allocationMode;
+  bool get femaleHandicapEnabled => _femaleHandicapEnabled;
   TeamResult? get currentResult => _currentResult;
   bool get isCurrentResultSaved => _isCurrentResultSaved;
 
@@ -72,6 +74,12 @@ class TeamBuilderController extends ChangeNotifier {
     notifyListeners();
   }
 
+  set femaleHandicapEnabled(bool value) {
+    if (value == _femaleHandicapEnabled) return;
+    _femaleHandicapEnabled = value;
+    notifyListeners();
+  }
+
   void setSavedMembers(List<Member> members) {
     _savedMembers = [...members];
     resetAllMembers();
@@ -90,6 +98,7 @@ class TeamBuilderController extends ChangeNotifier {
           name: member.name,
           score: member.score,
           type: ParticipantType.regular,
+          gender: member.gender,
         ),
       ),
     );
@@ -120,13 +129,18 @@ class TeamBuilderController extends ChangeNotifier {
         name: member.name,
         score: member.score,
         type: ParticipantType.regular,
+        gender: member.gender,
       ),
     );
     _sortParticipants();
     notifyListeners();
   }
 
-  void addManualTemporary(String name, int score) {
+  void addManualTemporary(
+    String name,
+    int score, {
+    MemberGender gender = MemberGender.male,
+  }) {
     validateManualScore(score);
     _participants.add(
       Participant(
@@ -134,6 +148,7 @@ class TeamBuilderController extends ChangeNotifier {
         name: name,
         score: score,
         type: ParticipantType.manualTemporary,
+        gender: gender,
       ),
     );
     _sortParticipants();
@@ -170,6 +185,7 @@ class TeamBuilderController extends ChangeNotifier {
                 name: member.name,
                 score: participant.score,
                 type: ParticipantType.regular,
+                gender: member.gender,
               );
             }),
       );
@@ -218,6 +234,7 @@ class TeamBuilderController extends ChangeNotifier {
         manualTemporaryMembers: temporary,
         teamSize: _teamSize,
         mode: _allocationMode,
+        applyFemaleHandicap: _femaleHandicapEnabled,
       ),
     );
     _currentResult = result;

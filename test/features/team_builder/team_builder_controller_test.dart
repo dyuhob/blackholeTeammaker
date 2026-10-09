@@ -13,7 +13,7 @@ void main() {
 
   setUp(() {
     members = [
-      Member(id: '1', name: '김회원', score: 180),
+      Member(id: '1', name: '김회원', score: 180, gender: MemberGender.female),
       Member(id: '2', name: '이회원', score: 165),
       Member(id: '3', name: '박회원', score: 175),
     ];
@@ -64,6 +64,29 @@ void main() {
 
     expect(controller.participants.last.name, '게스트');
     expect(controller.participants.last.type, ParticipantType.manualTemporary);
+  });
+
+  test('female handicap defaults off and applies to female result copies', () {
+    expect(controller.femaleHandicapEnabled, isFalse);
+    expect(controller.participants.first.gender, MemberGender.female);
+    controller
+      ..femaleHandicapEnabled = true
+      ..addManualTemporary('여성 게스트', 150, gender: MemberGender.female);
+
+    final result = controller.buildResult();
+    final participants = result.teams.expand((team) => team.participants);
+
+    expect(controller.femaleHandicapEnabled, isTrue);
+    expect(
+      participants
+          .where((value) => value.gender == MemberGender.female)
+          .map((value) => value.handicapScore),
+      everyElement(12),
+    );
+    expect(
+      controller.participants.map((value) => value.handicapScore),
+      everyElement(0),
+    );
   });
 
   test('manually entered participant scores must be between 90 and 200', () {

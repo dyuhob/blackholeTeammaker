@@ -1,24 +1,35 @@
 import 'dart:math';
 
 import 'package:flutter_test/flutter_test.dart';
+import 'package:team_maker/domain/member.dart';
 import 'package:team_maker/domain/participant.dart';
 import 'package:team_maker/domain/team.dart';
 import 'package:team_maker/domain/team_allocator.dart';
 
 void main() {
-  Participant regular(String id, int score) => Participant(
+  Participant regular(
+    String id,
+    int score, {
+    MemberGender gender = MemberGender.male,
+  }) => Participant(
     id: id,
     sourceMemberId: id,
     name: '회원 $id',
     score: score,
     type: ParticipantType.regular,
+    gender: gender,
   );
 
-  Participant manual(String id, int score) => Participant(
+  Participant manual(
+    String id,
+    int score, {
+    MemberGender gender = MemberGender.male,
+  }) => Participant(
     id: id,
     name: '임시 $id',
     score: score,
     type: ParticipantType.manualTemporary,
+    gender: gender,
   );
 
   Participant automatic(String id) => Participant(
@@ -194,6 +205,122 @@ void main() {
     }
 
     expect(assignments.length, greaterThan(1));
+  });
+
+  test('female handicap is applied per participant after allocation', () {
+    final allocator = TeamAllocator(
+      random: Random(3),
+      idFactory: () => 'unused',
+    );
+    final teams = allocator.allocate(
+      regularMembers: [
+        regular('female-high', 200, gender: MemberGender.female),
+        regular('male-high', 190),
+        regular('female-low', 180, gender: MemberGender.female),
+        regular('male-low', 170),
+      ],
+      manualTemporaryMembers: const [],
+      teamSize: 2,
+      mode: TeamAllocationMode.averageOrder,
+      applyFemaleHandicap: true,
+    );
+
+    final femaleTeam = teams.singleWhere(
+      (team) =>
+          team.participants
+              .where((value) => value.gender == MemberGender.female)
+              .length ==
+          2,
+    );
+    expect(femaleTeam.participants.map((value) => value.handicapScore), [
+      12,
+      12,
+    ]);
+    expect(femaleTeam.rawScore, 404);
+    expect(
+      teams
+          .expand((team) => team.participants)
+          .where((value) => value.gender != MemberGender.female)
+          .map((value) => value.handicapScore),
+      everyElement(0),
+    );
+  });
+
+  test('female manual guests get handicap but automatic guests do not', () {
+    var nextId = 0;
+    final allocator = TeamAllocator(
+      random: Random(4),
+      idFactory: () => 'auto-${nextId++}',
+    );
+    final teams = allocator.allocate(
+      regularMembers: [regular('male', 180), regular('low', 150)],
+      manualTemporaryMembers: [
+        manual('female-guest', 170, gender: MemberGender.female),
+      ],
+      teamSize: 2,
+      applyFemaleHandicap: true,
+    );
+    final participants = teams.expand((team) => team.participants);
+
+    expect(
+      participants
+          .singleWhere((value) => value.id == 'female-guest')
+          .handicapScore,
+      12,
+    );
+    expect(
+      participants
+          .where((value) => value.type == ParticipantType.autoTemporary)
+          .map((value) => value.handicapScore),
+      everyElement(0),
+    );
+  });
+
+  test('handicap does not change average-order team membership', () {
+    List<String> memberships(bool applyHandicap) {
+      final allocator = TeamAllocator(
+        random: Random(5),
+        idFactory: () => 'unused',
+      );
+      final teams = allocator.allocate(
+        regularMembers: [
+          regular('male-180', 180),
+          regular('female-170', 170, gender: MemberGender.female),
+          regular('male-160', 160),
+          regular('male-150', 150),
+        ],
+        manualTemporaryMembers: const [],
+        teamSize: 2,
+        mode: TeamAllocationMode.averageOrder,
+        applyFemaleHandicap: applyHandicap,
+      );
+      return teams
+          .map(
+            (team) =>
+                team.participants.map((value) => value.id).toList()..sort(),
+          )
+          .map((ids) => ids.join('/'))
+          .toList()
+        ..sort();
+    }
+
+    expect(memberships(true), memberships(false));
+  });
+
+  test('disabled handicap leaves female adjustments at zero', () {
+    final allocator = TeamAllocator(random: Random(6), idFactory: () => 'auto');
+    final teams = allocator.allocate(
+      regularMembers: [regular('female', 180, gender: MemberGender.female)],
+      manualTemporaryMembers: const [],
+      teamSize: 2,
+    );
+
+    expect(
+      teams
+          .expand((team) => team.participants)
+          .map((value) => value.handicapScore),
+      everyElement(0),
+    );
   });
 
   test('score compensation deducts the full-team gap to the lowest score', () {

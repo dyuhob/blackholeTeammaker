@@ -1,5 +1,6 @@
 import 'dart:math';
 
+import 'member.dart';
 import 'participant.dart';
 import 'team.dart';
 
@@ -16,6 +17,7 @@ class TeamAllocator {
     required List<Participant> manualTemporaryMembers,
     required int teamSize,
     TeamAllocationMode mode = TeamAllocationMode.random,
+    bool applyFemaleHandicap = false,
   }) {
     if (teamSize < 1) {
       throw ArgumentError.value(teamSize, 'teamSize', '팀당 인원은 1명 이상이어야 합니다.');
@@ -34,6 +36,7 @@ class TeamAllocator {
         participants: [...regularMembers, ...manualTemporaryMembers],
         teamCount: teamCount,
         automaticCount: automaticCount,
+        applyFemaleHandicap: applyFemaleHandicap,
       );
     }
 
@@ -94,13 +97,14 @@ class TeamAllocator {
       );
     }
 
-    return _buildTeams(teamMembers);
+    return _buildTeams(teamMembers, applyFemaleHandicap: applyFemaleHandicap);
   }
 
   List<Team> _allocateByAverage({
     required List<Participant> participants,
     required int teamCount,
     required int automaticCount,
+    required bool applyFemaleHandicap,
   }) {
     final lowestScore = participants.map((value) => value.score).reduce(min);
     for (var index = 0; index < automaticCount; index++) {
@@ -129,13 +133,28 @@ class TeamAllocator {
     for (var index = 0; index < orderedParticipants.length; index++) {
       teamMembers[index % teamCount].add(orderedParticipants[index]);
     }
-    return _buildTeams(teamMembers);
+    return _buildTeams(teamMembers, applyFemaleHandicap: applyFemaleHandicap);
   }
 
-  List<Team> _buildTeams(List<List<Participant>> teamMembers) {
+  List<Team> _buildTeams(
+    List<List<Participant>> teamMembers, {
+    required bool applyFemaleHandicap,
+  }) {
     final teams = List.generate(teamMembers.length, (index) {
-      final participants = teamMembers[index]
-        ..sort(_compareParticipantsForDisplay);
+      final participants =
+          teamMembers[index]
+              .map(
+                (participant) => participant.copyWith(
+                  handicapScore:
+                      applyFemaleHandicap &&
+                          participant.gender == MemberGender.female &&
+                          participant.type != ParticipantType.autoTemporary
+                      ? 12
+                      : 0,
+                ),
+              )
+              .toList()
+            ..sort(_compareParticipantsForDisplay);
       return Team(number: index + 1, participants: participants);
     });
     return _orderTeamsForDisplay(compensateScores(teams));
