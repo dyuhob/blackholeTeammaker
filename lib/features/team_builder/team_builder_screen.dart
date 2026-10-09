@@ -182,7 +182,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
           ),
           const SizedBox(height: 12),
           SizedBox(
-            height: _controlHeight,
+            height: _compactCardHeight,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
@@ -220,7 +220,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     showSelectedIcon: false,
                     style: ButtonStyle(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      visualDensity: const VisualDensity(vertical: 2),
+                      visualDensity: const VisualDensity(vertical: -1),
                       padding: const WidgetStatePropertyAll(
                         EdgeInsets.symmetric(horizontal: 4),
                       ),

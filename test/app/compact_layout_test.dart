@@ -184,6 +184,9 @@ void main() {
     expect(find.text('팀별 인원'), findsOneWidget);
     expect(allocationMode.top, buildButton.top);
     expect(allocationMode.height, buildButton.height);
+    expect(femaleHandicap.height, guestAdd.height);
+    expect(allocationMode.height, guestAdd.height);
+    expect(buildButton.height, guestAdd.height);
     expect(allocationMode.width, closeTo(buildButton.width, 1));
     expect(femaleHandicap.width, lessThan(buildButton.width));
     expect(femaleHandicap.left, closeTo(teamTitle.left, 0.1));
@@ -358,6 +361,17 @@ void main() {
     expect(memberAppBarBorder.bottom.color, const Color(0xFFF3F4F6));
 
     final saveButton = find.byKey(const Key('save-members-button'));
+    final memberList = find.ancestor(
+      of: find.byKey(const Key('member-card-1')),
+      matching: find.byType(ListView),
+    );
+    final memberListRect = tester.getRect(memberList);
+    final saveButtonRect = tester.getRect(saveButton);
+    final navigationRect = tester.getRect(find.byType(NavigationBar));
+    expect(
+      navigationRect.top - saveButtonRect.bottom,
+      closeTo(saveButtonRect.top - memberListRect.bottom, 0.1),
+    );
     expect(
       find.descendant(
         of: saveButton,

@@ -101,7 +101,7 @@ class _MemberScreenState extends State<MemberScreen> {
         return const Center(child: CircularProgressIndicator());
       }
       return Padding(
-        padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+        padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
