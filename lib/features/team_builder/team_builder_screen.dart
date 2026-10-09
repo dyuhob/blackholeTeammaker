@@ -5,6 +5,7 @@ import '../../app/navigation_icon_assets.dart';
 import '../../domain/manual_score.dart';
 import '../../domain/member.dart';
 import '../../domain/participant.dart';
+import '../../domain/team_allocator.dart';
 import '../../services/gallery_exporter.dart';
 import '../history/history_controller.dart';
 import '../history/team_result_screen.dart';
@@ -145,19 +146,19 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
         children: [
           SizedBox(
             height: _controlHeight,
-            child: TextField(
-              key: const Key('team-title-input'),
-              controller: _titleController,
-              onChanged: (value) => widget.controller.title = value,
-              decoration: _inputDecoration('팀 편성 이름'),
-            ),
-          ),
-          const SizedBox(height: 12),
-          SizedBox(
-            height: _controlHeight,
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
+                Expanded(
+                  flex: 5,
+                  child: TextField(
+                    key: const Key('team-title-input'),
+                    controller: _titleController,
+                    onChanged: (value) => widget.controller.title = value,
+                    decoration: _inputDecoration('팀 편성 이름'),
+                  ),
+                ),
+                const SizedBox(width: 10),
                 Expanded(
                   child: SizedBox(
                     key: const Key('team-size-control'),
@@ -168,16 +169,46 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                           widget.controller.teamSizeInput = value,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: _inputDecoration('팀당 인원수'),
+                      decoration: _inputDecoration('인원'),
                     ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 12),
+          SizedBox(
+            height: _controlHeight,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 2,
+                  child: SegmentedButton<TeamAllocationMode>(
+                    key: const Key('allocation-mode-toggle'),
+                    segments: const [
+                      ButtonSegment(
+                        value: TeamAllocationMode.random,
+                        label: Text('랜덤'),
+                      ),
+                      ButtonSegment(
+                        value: TeamAllocationMode.averageOrder,
+                        label: Text('에버순'),
+                      ),
+                    ],
+                    selected: {widget.controller.allocationMode},
+                    onSelectionChanged: (selection) =>
+                        widget.controller.allocationMode = selection.single,
                   ),
                 ),
                 const SizedBox(width: 10),
                 Expanded(
-                  flex: 2,
                   child: FilledButton.icon(
                     key: const Key('build-teams-button'),
                     onPressed: participants.isEmpty ? null : _buildTeams,
+                    style: FilledButton.styleFrom(
+                      padding: const EdgeInsets.symmetric(horizontal: 10),
+                    ),
                     icon: const ImageIcon(
                       AssetImage(NavigationIconAssets.buildTeams),
                     ),

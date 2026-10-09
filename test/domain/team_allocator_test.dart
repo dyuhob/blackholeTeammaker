@@ -105,6 +105,97 @@ void main() {
     }
   });
 
+  test('average order spreads score groups and gives automatic guests the lowest score', () {
+    var nextId = 0;
+    final allocator = TeamAllocator(
+      random: Random(7),
+      idFactory: () => 'auto-${nextId++}',
+    );
+
+    final teams = allocator.allocate(
+      regularMembers: [
+        regular('high-1', 200),
+        regular('high-2', 200),
+        regular('high-3', 200),
+        regular('low-1', 100),
+        regular('low-2', 100),
+      ],
+      manualTemporaryMembers: const [],
+      teamSize: 2,
+      mode: TeamAllocationMode.averageOrder,
+    );
+
+    expect(teams, hasLength(3));
+    expect(
+      teams.map(
+        (team) => team.participants.map((participant) => participant.score),
+      ),
+      everyElement(orderedEquals([200, 100])),
+    );
+    final automaticGuest = teams
+        .expand((team) => team.participants)
+        .singleWhere(
+          (participant) => participant.type == ParticipantType.autoTemporary,
+        );
+    expect(automaticGuest.score, 100);
+  });
+
+  test('random order keeps automatic guests at 160', () {
+    final allocator = TeamAllocator(random: Random(7), idFactory: () => 'auto');
+
+    final teams = allocator.allocate(
+      regularMembers: [regular('high', 200)],
+      manualTemporaryMembers: const [],
+      teamSize: 2,
+      mode: TeamAllocationMode.random,
+    );
+
+    expect(
+      teams
+          .expand((team) => team.participants)
+          .where(
+            (participant) => participant.type == ParticipantType.autoTemporary,
+          )
+          .map((participant) => participant.score),
+      everyElement(160),
+    );
+  });
+
+  test('average order randomizes participants within equal-score groups', () {
+    final assignments = <String>{};
+    for (var seed = 1; seed <= 10; seed++) {
+      final allocator = TeamAllocator(
+        random: Random(seed),
+        idFactory: () => 'unused',
+      );
+      final teams = allocator.allocate(
+        regularMembers: [
+          regular('high-1', 200),
+          regular('high-2', 200),
+          regular('high-3', 200),
+          regular('low-1', 100),
+          regular('low-2', 100),
+          regular('low-3', 100),
+        ],
+        manualTemporaryMembers: const [],
+        teamSize: 2,
+        mode: TeamAllocationMode.averageOrder,
+      );
+      final pairs =
+          teams
+              .map(
+                (team) =>
+                    team.participants.map((value) => value.id).toList()..sort(),
+              )
+              .map((pair) => pair.join('/'))
+              .toList()
+            ..sort();
+      assignments.add(pairs.join('|'));
+    }
+
+    expect(assignments.length, greaterThan(1));
+  });
+
   test('score compensation deducts the full-team gap to the lowest score', () {
     final allocator = TeamAllocator(random: Random(1), idFactory: () => 'id');
     final teams = [

@@ -3,6 +3,8 @@ import 'dart:math';
 import 'participant.dart';
 import 'team.dart';
 
+enum TeamAllocationMode { random, averageOrder }
+
 class TeamAllocator {
   TeamAllocator({required this._random, required this._idFactory});
 
@@ -13,6 +15,7 @@ class TeamAllocator {
     required List<Participant> regularMembers,
     required List<Participant> manualTemporaryMembers,
     required int teamSize,
+    TeamAllocationMode mode = TeamAllocationMode.random,
   }) {
     if (teamSize < 1) {
       throw ArgumentError.value(teamSize, 'teamSize', '팀당 인원은 1명 이상이어야 합니다.');
@@ -25,6 +28,15 @@ class TeamAllocator {
     final teamCount = max(2, (selectedCount / teamSize).ceil());
     final capacity = teamCount * teamSize;
     final automaticCount = capacity - selectedCount;
+
+    if (mode == TeamAllocationMode.averageOrder) {
+      return _allocateByAverage(
+        participants: [...regularMembers, ...manualTemporaryMembers],
+        teamCount: teamCount,
+        automaticCount: automaticCount,
+      );
+    }
+
     final totalTemporaryCount = manualTemporaryMembers.length + automaticCount;
 
     final temporaryTargets = List<int>.filled(
@@ -82,7 +94,46 @@ class TeamAllocator {
       );
     }
 
-    final teams = List.generate(teamCount, (index) {
+    return _buildTeams(teamMembers);
+  }
+
+  List<Team> _allocateByAverage({
+    required List<Participant> participants,
+    required int teamCount,
+    required int automaticCount,
+  }) {
+    final lowestScore = participants.map((value) => value.score).reduce(min);
+    for (var index = 0; index < automaticCount; index++) {
+      participants.add(
+        Participant(
+          id: _idFactory(),
+          name: '게스트 ${index + 1} (자동)',
+          score: lowestScore,
+          type: ParticipantType.autoTemporary,
+        ),
+      );
+    }
+
+    final scoreGroups = <int, List<Participant>>{};
+    for (final participant in participants) {
+      (scoreGroups[participant.score] ??= []).add(participant);
+    }
+    final orderedParticipants = <Participant>[];
+    final scores = scoreGroups.keys.toList()..sort((a, b) => b.compareTo(a));
+    for (final score in scores) {
+      final group = scoreGroups[score]!..shuffle(_random);
+      orderedParticipants.addAll(group);
+    }
+
+    final teamMembers = List.generate(teamCount, (_) => <Participant>[]);
+    for (var index = 0; index < orderedParticipants.length; index++) {
+      teamMembers[index % teamCount].add(orderedParticipants[index]);
+    }
+    return _buildTeams(teamMembers);
+  }
+
+  List<Team> _buildTeams(List<List<Participant>> teamMembers) {
+    final teams = List.generate(teamMembers.length, (index) {
       final participants = teamMembers[index]
         ..sort(_compareParticipantsForDisplay);
       return Team(number: index + 1, participants: participants);

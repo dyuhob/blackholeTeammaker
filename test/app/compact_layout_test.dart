@@ -164,17 +164,30 @@ void main() {
       findsNothing,
     );
 
+    final teamTitle = tester.getRect(find.byKey(const Key('team-title-input')));
     final teamSize = tester.getRect(find.byKey(const Key('team-size-control')));
+    final allocationMode = tester.getRect(
+      find.byKey(const Key('allocation-mode-toggle')),
+    );
     final buildButton = tester.getRect(
       find.byKey(const Key('build-teams-button')),
     );
     final unselectedTitle = tester.getRect(
       find.byKey(const Key('unselected-section-title')),
     );
-    expect(teamSize.top, buildButton.top);
-    expect(teamSize.height, buildButton.height);
-    expect(buildButton.width, greaterThan(teamSize.width * 1.8));
+    expect(teamTitle.top, teamSize.top);
+    expect(teamTitle.height, teamSize.height);
+    expect(teamTitle.width, greaterThan(teamSize.width * 4.8));
+    expect(allocationMode.top, buildButton.top);
+    expect(allocationMode.height, buildButton.height);
+    expect(allocationMode.width, closeTo(buildButton.width * 2, 1));
+    expect(allocationMode.top, greaterThan(teamTitle.bottom));
     expect(buildButton.bottom, lessThanOrEqualTo(unselectedTitle.top));
+
+    expect(controller.allocationMode, TeamAllocationMode.random);
+    await tester.tap(find.text('에버순'));
+    await tester.pump();
+    expect(controller.allocationMode, TeamAllocationMode.averageOrder);
   });
 
   testWidgets('inputs are white and guest dialog controls match top height', (

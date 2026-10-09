@@ -21,6 +21,7 @@ class TeamBuilderController extends ChangeNotifier {
   int _teamSize = 3;
   String _teamSizeInput = '3';
   String _title = '';
+  TeamAllocationMode _allocationMode = TeamAllocationMode.random;
   TeamResult? _currentResult;
   bool _isCurrentResultSaved = false;
 
@@ -38,6 +39,7 @@ class TeamBuilderController extends ChangeNotifier {
   int get teamSize => _teamSize;
   String get teamSizeInput => _teamSizeInput;
   String get title => _title;
+  TeamAllocationMode get allocationMode => _allocationMode;
   TeamResult? get currentResult => _currentResult;
   bool get isCurrentResultSaved => _isCurrentResultSaved;
 
@@ -61,6 +63,12 @@ class TeamBuilderController extends ChangeNotifier {
   set title(String value) {
     if (value == _title) return;
     _title = value;
+    notifyListeners();
+  }
+
+  set allocationMode(TeamAllocationMode value) {
+    if (value == _allocationMode) return;
+    _allocationMode = value;
     notifyListeners();
   }
 
@@ -209,6 +217,7 @@ class TeamBuilderController extends ChangeNotifier {
         regularMembers: regulars,
         manualTemporaryMembers: temporary,
         teamSize: _teamSize,
+        mode: _allocationMode,
       ),
     );
     _currentResult = result;

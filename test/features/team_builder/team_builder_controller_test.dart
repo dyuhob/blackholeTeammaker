@@ -104,6 +104,21 @@ void main() {
     expect(controller.isCurrentResultSaved, isFalse);
   });
 
+  test('build uses the selected allocation mode', () {
+    controller
+      ..teamSize = 2
+      ..allocationMode = TeamAllocationMode.averageOrder;
+
+    final result = controller.buildResult();
+
+    final automaticGuest = result.teams
+        .expand((team) => team.participants)
+        .singleWhere(
+          (participant) => participant.type == ParticipantType.autoTemporary,
+        );
+    expect(automaticGuest.score, 165);
+  });
+
   test('restores exclusions guests edited scores and form inputs', () {
     controller.restoreWorkspace(
       participants: [
