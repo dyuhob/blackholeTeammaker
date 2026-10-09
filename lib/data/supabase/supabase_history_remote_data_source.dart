@@ -40,7 +40,7 @@ class SupabaseHistoryRemoteDataSource implements HistoryRemoteDataSource {
         .from('participants')
         .select(
           'client_id,game_id,user_id,name,average,team_no,'
-          'auto_insert,deleted_at',
+          'auto_insert,handicap,deleted_at',
         )
         .isFilter('deleted_at', null);
     final participants = participantResponse

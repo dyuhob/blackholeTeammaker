@@ -102,4 +102,76 @@ void main() {
       expect(TeamResult.fromJson(result.toJson()), result);
     });
   }
+
+  test('history codec preserves applied female handicap', () {
+    final result = TeamResult(
+      id: '10000000-0000-0000-0000-000000000002',
+      title: '여성 핸디 경기',
+      createdAt: DateTime.utc(2026, 10, 9, 10),
+      teamSize: 1,
+      teams: [
+        Team(
+          number: 1,
+          participants: [
+            Participant(
+              id: 'female-1',
+              sourceMemberId: 'member-1',
+              name: '여성 회원',
+              score: 180,
+              type: ParticipantType.regular,
+              gender: MemberGender.female,
+              handicapScore: 12,
+            ),
+          ],
+        ),
+      ],
+    );
+
+    final payload = teamResultToRemotePayload(result);
+    final rows = (payload['participants']! as List<Object?>)
+        .cast<Map<String, Object?>>();
+    expect(rows.single, containsPair('handicap', 12));
+
+    final decoded = teamResultFromRemoteRows({
+      'client_id': result.id,
+      'name': result.title,
+      'created_at': result.createdAt.toIso8601String(),
+      'group_size': result.teamSize,
+      'highest_average': 192,
+      'deleted_at': null,
+    }, rows);
+    final participant = decoded.teams.single.participants.single;
+    expect(participant.gender, MemberGender.female);
+    expect(participant.handicapScore, 12);
+    expect(decoded.teams.single.rawScore, 192);
+  });
+
+  test('legacy history rows default missing handicap to zero', () {
+    final decoded = teamResultFromRemoteRows(
+      {
+        'client_id': '10000000-0000-0000-0000-000000000003',
+        'name': '기존 경기',
+        'created_at': DateTime.utc(2026, 10, 9).toIso8601String(),
+        'group_size': 1,
+        'highest_average': 180,
+        'deleted_at': null,
+      },
+      [
+        {
+          'client_id': 'legacy-member',
+          'game_id': 1,
+          'user_id': 'member-1',
+          'name': '기존 회원',
+          'average': 180,
+          'team_no': 1,
+          'auto_insert': null,
+          'deleted_at': null,
+        },
+      ],
+    );
+
+    final participant = decoded.teams.single.participants.single;
+    expect(participant.gender, MemberGender.male);
+    expect(participant.handicapScore, 0);
+  });
 }

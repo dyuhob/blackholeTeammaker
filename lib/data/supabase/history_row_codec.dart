@@ -1,3 +1,4 @@
+import '../../domain/member.dart';
 import '../../domain/participant.dart';
 import '../../domain/team.dart';
 import '../../domain/team_result.dart';
@@ -20,6 +21,7 @@ Map<String, Object?> teamResultToRemotePayload(TeamResult result) => {
           'user_id': participant.sourceMemberId,
           'name': participant.name,
           'average': participant.score,
+          'handicap': participant.handicapScore,
           'team_no': team.number,
           'auto_insert': switch (participant.type) {
             ParticipantType.regular => null,
@@ -42,6 +44,7 @@ TeamResult teamResultFromRemoteRows(
     final teamNumber = (row['team_no']! as num).toInt();
     final memberId = row['user_id']?.toString();
     final autoInsert = (row['auto_insert'] as num?)?.toInt();
+    final handicapScore = (row['handicap'] as num?)?.toInt() ?? 0;
     final type = memberId != null
         ? ParticipantType.regular
         : autoInsert == 1
@@ -56,6 +59,8 @@ TeamResult teamResultFromRemoteRows(
             name: row['name']! as String,
             score: (row['average']! as num).toInt(),
             type: type,
+            gender: handicapScore > 0 ? MemberGender.female : MemberGender.male,
+            handicapScore: handicapScore,
           ),
         );
   }
@@ -77,7 +82,10 @@ TeamResult teamResultFromRemoteRows(
               participants: entry.value,
               bonusScore:
                   targetScore -
-                  entry.value.fold<int>(0, (sum, value) => sum + value.score),
+                  entry.value.fold<int>(
+                    0,
+                    (sum, value) => sum + value.effectiveScore,
+                  ),
             ),
           )
           .toList()
