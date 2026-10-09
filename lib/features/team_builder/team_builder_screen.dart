@@ -66,7 +66,11 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
       builder: (context) => const _TemporaryMemberDialog(),
     );
     if (!mounted || input == null) return;
-    widget.controller.addManualTemporary(input.name, input.score);
+    widget.controller.addManualTemporary(
+      input.name,
+      input.score,
+      gender: input.gender,
+    );
   }
 
   void _buildTeams() {
@@ -183,9 +187,18 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  flex: 2,
                   child: SegmentedButton<TeamAllocationMode>(
                     key: const Key('allocation-mode-toggle'),
+                    showSelectedIcon: false,
+                    style: const ButtonStyle(
+                      visualDensity: VisualDensity.compact,
+                      padding: WidgetStatePropertyAll(
+                        EdgeInsets.symmetric(horizontal: 4),
+                      ),
+                      textStyle: WidgetStatePropertyAll(
+                        TextStyle(fontSize: 12),
+                      ),
+                    ),
                     segments: const [
                       ButtonSegment(
                         value: TeamAllocationMode.random,
@@ -213,6 +226,36 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                       AssetImage(NavigationIconAssets.buildTeams),
                     ),
                     label: const Text('팀짜기'),
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: InkWell(
+                    key: const Key('female-handicap-control'),
+                    borderRadius: BorderRadius.circular(12),
+                    onTap: () => widget.controller.femaleHandicapEnabled =
+                        !widget.controller.femaleHandicapEnabled,
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Checkbox(
+                          value: widget.controller.femaleHandicapEnabled,
+                          onChanged: (value) =>
+                              widget.controller.femaleHandicapEnabled =
+                                  value ?? false,
+                          visualDensity: VisualDensity.compact,
+                          materialTapTargetSize:
+                              MaterialTapTargetSize.shrinkWrap,
+                        ),
+                        const Flexible(
+                          child: Text(
+                            '여성핸디',
+                            maxLines: 1,
+                            style: TextStyle(fontSize: 12),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
               ],
@@ -492,10 +535,15 @@ class _ParticipantCard extends StatelessWidget {
 }
 
 class _TemporaryMemberInput {
-  const _TemporaryMemberInput({required this.name, required this.score});
+  const _TemporaryMemberInput({
+    required this.name,
+    required this.score,
+    required this.gender,
+  });
 
   final String name;
   final int score;
+  final MemberGender gender;
 }
 
 class _TemporaryMemberDialog extends StatefulWidget {
@@ -510,6 +558,7 @@ class _TemporaryMemberDialogState extends State<_TemporaryMemberDialog> {
   final _scoreController = TextEditingController();
   String? _nameError;
   String? _scoreError;
+  MemberGender _gender = MemberGender.male;
 
   @override
   void dispose() {
@@ -530,7 +579,10 @@ class _TemporaryMemberDialogState extends State<_TemporaryMemberDialog> {
       });
       return;
     }
-    Navigator.pop(context, _TemporaryMemberInput(name: name, score: score));
+    Navigator.pop(
+      context,
+      _TemporaryMemberInput(name: name, score: score, gender: _gender),
+    );
   }
 
   @override
@@ -560,6 +612,19 @@ class _TemporaryMemberDialogState extends State<_TemporaryMemberDialog> {
               ),
             ),
           ],
+          const SizedBox(height: 12),
+          SizedBox(
+            height: _controlHeight,
+            child: DropdownButtonFormField<MemberGender>(
+              key: const Key('temporary-gender-input'),
+              initialValue: _gender,
+              decoration: _inputDecoration('성별'),
+              items: _genderItems(),
+              onChanged: (value) {
+                if (value != null) setState(() => _gender = value);
+              },
+            ),
+          ),
           const SizedBox(height: 12),
           SizedBox(
             height: _controlHeight,
@@ -597,3 +662,8 @@ class _TemporaryMemberDialogState extends State<_TemporaryMemberDialog> {
     ],
   );
 }
+
+List<DropdownMenuItem<MemberGender>> _genderItems() => [
+  for (final gender in MemberGender.values)
+    DropdownMenuItem(value: gender, child: Text(gender.label)),
+];

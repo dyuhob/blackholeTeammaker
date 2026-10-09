@@ -97,13 +97,27 @@ class _TeamCard extends StatelessWidget {
                     children: [
                       Text(
                         '${startNumber + index}',
+                        key: ValueKey('participant-number-${participant.id}'),
                         style: const TextStyle(
-                          color: Color(0xFF1976D2),
+                          color: Colors.black,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
                       const SizedBox(width: 8),
                       Expanded(child: Text(_participantLabel(participant))),
+                      if (participant.handicapScore != 0) ...[
+                        Text(
+                          '+${participant.handicapScore}',
+                          key: ValueKey(
+                            'participant-handicap-${participant.id}',
+                          ),
+                          style: const TextStyle(
+                            color: Colors.red,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                      ],
                       Text('${participant.score}'),
                     ],
                   ),

@@ -169,6 +169,9 @@ void main() {
     final allocationMode = tester.getRect(
       find.byKey(const Key('allocation-mode-toggle')),
     );
+    final femaleHandicap = tester.getRect(
+      find.byKey(const Key('female-handicap-control')),
+    );
     final buildButton = tester.getRect(
       find.byKey(const Key('build-teams-button')),
     );
@@ -180,7 +183,8 @@ void main() {
     expect(teamTitle.width, greaterThan(teamSize.width * 4.8));
     expect(allocationMode.top, buildButton.top);
     expect(allocationMode.height, buildButton.height);
-    expect(allocationMode.width, closeTo(buildButton.width * 2, 1));
+    expect(allocationMode.width, closeTo(buildButton.width, 1));
+    expect(femaleHandicap.width, closeTo(buildButton.width, 1));
     expect(allocationMode.top, greaterThan(teamTitle.bottom));
     expect(buildButton.bottom, lessThanOrEqualTo(unselectedTitle.top));
 
@@ -188,6 +192,28 @@ void main() {
     await tester.tap(find.text('에버순'));
     await tester.pump();
     expect(controller.allocationMode, TeamAllocationMode.averageOrder);
+    expect(controller.femaleHandicapEnabled, isFalse);
+    await tester.tap(find.byKey(const Key('female-handicap-control')));
+    await tester.pump();
+    expect(controller.femaleHandicapEnabled, isTrue);
+    expect(tester.takeException(), isNull);
+
+    await tester.tap(find.byKey(const Key('guest-add-card')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.byKey(const Key('temporary-gender-input')));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('W').last);
+    await tester.enterText(
+      find.byKey(const Key('temporary-name-input')),
+      '여성 게스트',
+    );
+    await tester.enterText(
+      find.byKey(const Key('temporary-score-input')),
+      '170',
+    );
+    await tester.tap(find.byKey(const Key('add-temporary-button')));
+    await tester.pumpAndSettle();
+    expect(controller.participants.last.gender, MemberGender.female);
   });
 
   testWidgets('inputs are white and guest dialog controls match top height', (
@@ -373,6 +399,83 @@ void main() {
       find.byKey(const Key('team-total-score-1')),
     );
     expect(bonusRect.right, lessThan(totalRect.left));
+  });
+
+  testWidgets('result shows each female handicap and black numbering', (
+    tester,
+  ) async {
+    final result = TeamResult(
+      id: 'female-result',
+      title: '여성 핸디',
+      createdAt: DateTime(2026, 10, 9),
+      teamSize: 2,
+      teams: [
+        Team(
+          number: 1,
+          participants: [
+            Participant(
+              id: 'female-1',
+              name: '여성 1',
+              score: 180,
+              type: ParticipantType.regular,
+              gender: MemberGender.female,
+              handicapScore: 12,
+            ),
+            Participant(
+              id: 'female-2',
+              name: '여성 2',
+              score: 170,
+              type: ParticipantType.regular,
+              gender: MemberGender.female,
+              handicapScore: 12,
+            ),
+          ],
+        ),
+      ],
+    );
+
+    Future<void> expectResultContent() async {
+      expect(
+        find.byKey(const Key('participant-handicap-female-1')),
+        findsOneWidget,
+      );
+      expect(
+        find.byKey(const Key('participant-handicap-female-2')),
+        findsOneWidget,
+      );
+      expect(find.text('+12'), findsNWidgets(2));
+      expect(find.text('180'), findsOneWidget);
+      expect(find.text('170'), findsOneWidget);
+      expect(find.text('374'), findsOneWidget);
+      for (final id in ['female-1', 'female-2']) {
+        expect(
+          tester
+              .widget<Text>(find.byKey(Key('participant-number-$id')))
+              .style
+              ?.color,
+          Colors.black,
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(Key('participant-handicap-$id')))
+              .style
+              ?.color,
+          Colors.red,
+        );
+      }
+    }
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(body: TeamResultContent(result: result)),
+      ),
+    );
+    await expectResultContent();
+
+    await tester.pumpWidget(
+      MaterialApp(home: TeamResultExportWidget(result: result)),
+    );
+    await expectResultContent();
   });
 
   testWidgets('exported result uses the app background color', (tester) async {
