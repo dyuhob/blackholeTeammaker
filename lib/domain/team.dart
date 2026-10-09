@@ -11,7 +11,8 @@ class Team {
   final List<Participant> participants;
   final int bonusScore;
 
-  int get rawScore => participants.fold(0, (sum, member) => sum + member.score);
+  int get rawScore =>
+      participants.fold(0, (sum, member) => sum + member.effectiveScore);
   int get effectiveScore => rawScore + bonusScore;
 
   Team copyWith({

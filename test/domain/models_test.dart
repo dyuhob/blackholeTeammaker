@@ -11,6 +11,52 @@ void main() {
     expect(Member.fromJson(member.toJson()), member);
   });
 
+  test('legacy gender and handicap fields default to zero values', () {
+    final member = Member.fromJson({'id': 'm', 'name': '남성', 'score': 180});
+    final participant = Participant.fromJson({
+      'id': 'p',
+      'sourceMemberId': 'm',
+      'name': '남성',
+      'score': 180,
+      'type': 'regular',
+    });
+
+    expect(member.gender, MemberGender.male);
+    expect(participant.gender, MemberGender.male);
+    expect(participant.handicapScore, 0);
+    expect(participant.effectiveScore, 180);
+  });
+
+  test('female gender and each applied handicap survive JSON round trips', () {
+    final member = Member(
+      id: 'female',
+      name: '여성',
+      score: 180,
+      gender: MemberGender.female,
+    );
+    final first = Participant(
+      id: 'first',
+      name: '여성 1',
+      score: 180,
+      type: ParticipantType.regular,
+      gender: MemberGender.female,
+      handicapScore: 12,
+    );
+    final second = Participant(
+      id: 'second',
+      name: '여성 2',
+      score: 170,
+      type: ParticipantType.regular,
+      gender: MemberGender.female,
+      handicapScore: 12,
+    );
+
+    expect(Member.fromJson(member.toJson()), member);
+    expect(Participant.fromJson(first.toJson()), first);
+    expect(first.effectiveScore, 192);
+    expect(Team(number: 1, participants: [first, second]).rawScore, 374);
+  });
+
   test('member rejects scores below zero and above 300', () {
     expect(() => Member(id: 'low', name: '낮음', score: -1), throwsArgumentError);
     expect(

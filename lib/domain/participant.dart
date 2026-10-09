@@ -1,3 +1,5 @@
+import 'member.dart';
+
 enum ParticipantType {
   regular(0),
   manualTemporary(1),
@@ -17,6 +19,8 @@ class Participant {
     required String name,
     required this.score,
     required this.type,
+    this.gender = MemberGender.male,
+    this.handicapScore = 0,
   }) : name = name.trim() {
     if (id.isEmpty) {
       throw ArgumentError.value(id, 'id', 'ID는 비어 있을 수 없습니다.');
@@ -34,13 +38,24 @@ class Participant {
   final String name;
   final int score;
   final ParticipantType type;
+  final MemberGender gender;
+  final int handicapScore;
 
-  Participant copyWith({String? name, int? score}) => Participant(
+  int get effectiveScore => score + handicapScore;
+
+  Participant copyWith({
+    String? name,
+    int? score,
+    MemberGender? gender,
+    int? handicapScore,
+  }) => Participant(
     id: id,
     sourceMemberId: sourceMemberId,
     name: name ?? this.name,
     score: score ?? this.score,
     type: type,
+    gender: gender ?? this.gender,
+    handicapScore: handicapScore ?? this.handicapScore,
   );
 
   Map<String, Object?> toJson() => {
@@ -49,6 +64,8 @@ class Participant {
     'name': name,
     'score': score,
     'type': type.name,
+    'gender': gender.storageValue,
+    'handicapScore': handicapScore,
   };
 
   factory Participant.fromJson(Map<String, Object?> json) => Participant(
@@ -57,6 +74,8 @@ class Participant {
     name: json['name']! as String,
     score: json['score']! as int,
     type: ParticipantType.values.byName(json['type']! as String),
+    gender: MemberGender.fromStorage(json['gender']),
+    handicapScore: json['handicapScore'] as int? ?? 0,
   );
 
   @override
@@ -67,8 +86,11 @@ class Participant {
           other.sourceMemberId == sourceMemberId &&
           other.name == name &&
           other.score == score &&
-          other.type == type;
+          other.type == type &&
+          other.gender == gender &&
+          other.handicapScore == handicapScore;
 
   @override
-  int get hashCode => Object.hash(id, sourceMemberId, name, score, type);
+  int get hashCode =>
+      Object.hash(id, sourceMemberId, name, score, type, gender, handicapScore);
 }

@@ -7,6 +7,7 @@ class WorkspaceState {
     required this.draftMembers,
     required this.pendingMemberName,
     required this.pendingMemberScore,
+    this.pendingMemberGender = MemberGender.male,
     required this.participants,
     required this.teamSizeInput,
     required this.title,
@@ -16,6 +17,7 @@ class WorkspaceState {
   final List<Member> draftMembers;
   final String pendingMemberName;
   final String pendingMemberScore;
+  final MemberGender pendingMemberGender;
   final List<Participant> participants;
   final String teamSizeInput;
   final String title;
@@ -25,6 +27,7 @@ class WorkspaceState {
     'draftMembers': draftMembers.map((member) => member.toJson()).toList(),
     'pendingMemberName': pendingMemberName,
     'pendingMemberScore': pendingMemberScore,
+    'pendingMemberGender': pendingMemberGender.storageValue,
     'participants': participants
         .map((participant) => participant.toJson())
         .toList(),
@@ -39,6 +42,7 @@ class WorkspaceState {
         .toList(),
     pendingMemberName: json['pendingMemberName']! as String,
     pendingMemberScore: json['pendingMemberScore']! as String,
+    pendingMemberGender: MemberGender.fromStorage(json['pendingMemberGender']),
     participants: (json['participants']! as List<Object?>)
         .map((value) => Participant.fromJson(value! as Map<String, Object?>))
         .toList(),
@@ -54,6 +58,7 @@ class WorkspaceState {
           _listEquals(other.draftMembers, draftMembers) &&
           other.pendingMemberName == pendingMemberName &&
           other.pendingMemberScore == pendingMemberScore &&
+          other.pendingMemberGender == pendingMemberGender &&
           _listEquals(other.participants, participants) &&
           other.teamSizeInput == teamSizeInput &&
           other.title == title;
@@ -64,6 +69,7 @@ class WorkspaceState {
     Object.hashAll(draftMembers),
     pendingMemberName,
     pendingMemberScore,
+    pendingMemberGender,
     Object.hashAll(participants),
     teamSizeInput,
     title,

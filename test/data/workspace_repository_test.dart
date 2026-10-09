@@ -11,9 +11,17 @@ void main() {
     final repository = JsonWorkspaceRepository(store);
     final state = WorkspaceState(
       selectedTabIndex: 1,
-      draftMembers: [Member(id: 'draft-1', name: '새 클럽원', score: 170)],
+      draftMembers: [
+        Member(
+          id: 'draft-1',
+          name: '새 클럽원',
+          score: 170,
+          gender: MemberGender.female,
+        ),
+      ],
       pendingMemberName: '입력 중 이름',
       pendingMemberScore: '155',
+      pendingMemberGender: MemberGender.female,
       participants: [
         Participant(
           id: 'participant-1',
@@ -21,6 +29,7 @@ void main() {
           name: '기존 클럽원',
           score: 185,
           type: ParticipantType.regular,
+          gender: MemberGender.female,
         ),
         Participant(
           id: 'guest-1',
@@ -37,6 +46,33 @@ void main() {
 
     expect(await repository.load(), state);
     expect(store.value?['schemaVersion'], 1);
+  });
+
+  test('legacy workspace data defaults missing gender and handicap', () {
+    final restored = WorkspaceState.fromJson({
+      'selectedTabIndex': 1,
+      'draftMembers': [
+        {'id': 'draft-1', 'name': '기존 회원', 'score': 170},
+      ],
+      'pendingMemberName': '입력 중',
+      'pendingMemberScore': '160',
+      'participants': [
+        {
+          'id': 'participant-1',
+          'sourceMemberId': 'draft-1',
+          'name': '기존 회원',
+          'score': 170,
+          'type': 'regular',
+        },
+      ],
+      'teamSizeInput': '3',
+      'title': '기존 경기',
+    });
+
+    expect(restored.pendingMemberGender, MemberGender.male);
+    expect(restored.draftMembers.single.gender, MemberGender.male);
+    expect(restored.participants.single.gender, MemberGender.male);
+    expect(restored.participants.single.handicapScore, 0);
   });
 
   test('workspace repository returns null when no draft exists', () async {
