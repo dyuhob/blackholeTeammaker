@@ -28,7 +28,7 @@ void main() {
 
       expect(store.value?['schemaVersion'], 2);
       expect(store.value?['members'], [
-        {'id': '1', 'name': '김회원', 'score': 180},
+        {'id': '1', 'name': '김회원', 'score': 180, 'gender': 0},
       ]);
       final pending = store.value?['pendingMutations']! as List<Object?>;
       expect(pending, hasLength(1));

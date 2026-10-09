@@ -52,7 +52,46 @@ bool _historyEqualIgnoringOrder(List<TeamResult> left, List<TeamResult> right) {
   final rightById = {for (final value in right) value.id: value};
   if (leftById.length != rightById.length) return false;
   for (final entry in leftById.entries) {
-    if (rightById[entry.key] != entry.value) return false;
+    final remote = rightById[entry.key];
+    if (remote == null || !_persistedHistoryEqual(entry.value, remote)) {
+      return false;
+    }
+  }
+  return true;
+}
+
+bool _persistedHistoryEqual(TeamResult left, TeamResult right) {
+  if (left.id != right.id ||
+      left.title != right.title ||
+      left.createdAt != right.createdAt ||
+      left.teamSize != right.teamSize ||
+      left.teams.length != right.teams.length) {
+    return false;
+  }
+  for (var teamIndex = 0; teamIndex < left.teams.length; teamIndex++) {
+    final leftTeam = left.teams[teamIndex];
+    final rightTeam = right.teams[teamIndex];
+    if (leftTeam.number != rightTeam.number ||
+        leftTeam.bonusScore != rightTeam.bonusScore ||
+        leftTeam.participants.length != rightTeam.participants.length) {
+      return false;
+    }
+    for (
+      var participantIndex = 0;
+      participantIndex < leftTeam.participants.length;
+      participantIndex++
+    ) {
+      final leftParticipant = leftTeam.participants[participantIndex];
+      final rightParticipant = rightTeam.participants[participantIndex];
+      if (leftParticipant.id != rightParticipant.id ||
+          leftParticipant.sourceMemberId != rightParticipant.sourceMemberId ||
+          leftParticipant.name != rightParticipant.name ||
+          leftParticipant.score != rightParticipant.score ||
+          leftParticipant.type != rightParticipant.type ||
+          leftParticipant.handicapScore != rightParticipant.handicapScore) {
+        return false;
+      }
+    }
   }
   return true;
 }

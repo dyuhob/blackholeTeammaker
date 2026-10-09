@@ -5,6 +5,7 @@ import 'package:team_maker/core/storage/json_object_store.dart';
 import 'package:team_maker/data/json_member_repository.dart';
 import 'package:team_maker/data/json_team_history_repository.dart';
 import 'package:team_maker/data/supabase/history_remote_data_source.dart';
+import 'package:team_maker/data/supabase/history_row_codec.dart';
 import 'package:team_maker/data/supabase/member_remote_data_source.dart';
 import 'package:team_maker/data/sync/history_sync_coordinator.dart';
 import 'package:team_maker/data/sync/member_sync_coordinator.dart';
@@ -113,6 +114,47 @@ void main() {
     expect(outcome.kind, SyncOutcomeKind.remoteChanged);
     await coordinator.acceptRemote(outcome.snapshot!);
     expect((await local.loadAll()).single.title, '변경');
+  });
+
+  test(
+    'history sync ignores unpersisted female gender when handicap is off',
+    () async {
+      final femaleResult = result(
+        'female-off',
+        '여성 핸디 미적용',
+        gender: MemberGender.female,
+      );
+      final coordinator = HistorySyncCoordinator(
+        local: JsonTeamHistoryRepository(MemoryStore()),
+        remote: FakeHistoryRemote([historyCodecRoundTrip(femaleResult)]),
+      );
+
+      final outcome = await coordinator.synchronize([femaleResult]);
+
+      expect(outcome.kind, SyncOutcomeKind.unchanged);
+    },
+  );
+
+  test('history sync detects a changed applied handicap', () async {
+    final withoutHandicap = result(
+      'female-changed',
+      '여성 핸디 변경',
+      gender: MemberGender.female,
+    );
+    final withHandicap = result(
+      'female-changed',
+      '여성 핸디 변경',
+      gender: MemberGender.female,
+      handicapScore: 12,
+    );
+    final coordinator = HistorySyncCoordinator(
+      local: JsonTeamHistoryRepository(MemoryStore()),
+      remote: FakeHistoryRemote([historyCodecRoundTrip(withHandicap)]),
+    );
+
+    final outcome = await coordinator.synchronize([withoutHandicap]);
+
+    expect(outcome.kind, SyncOutcomeKind.remoteChanged);
   });
 
   test(
@@ -235,7 +277,12 @@ class BlockingHistoryRemote implements HistoryRemoteDataSource {
   }
 }
 
-TeamResult result(String id, String title) => TeamResult(
+TeamResult result(
+  String id,
+  String title, {
+  MemberGender gender = MemberGender.male,
+  int handicapScore = 0,
+}) => TeamResult(
   id: id,
   title: title,
   createdAt: DateTime.utc(2026, 9, 9),
@@ -246,11 +293,27 @@ TeamResult result(String id, String title) => TeamResult(
       participants: [
         Participant(
           id: 'p-$id',
+          sourceMemberId: 'member-$id',
           name: '회원',
           score: 180,
           type: ParticipantType.regular,
+          gender: gender,
+          handicapScore: handicapScore,
         ),
       ],
     ),
   ],
 );
+
+TeamResult historyCodecRoundTrip(TeamResult source) {
+  final payload = teamResultToRemotePayload(source);
+  final participants = (payload['participants']! as List<Object?>)
+      .cast<Map<String, Object?>>();
+  return teamResultFromRemoteRows({
+    'client_id': payload['client_id'],
+    'name': payload['name'],
+    'created_at': payload['created_at'],
+    'group_size': payload['group_size'],
+    'highest_average': payload['highest_average'],
+  }, participants);
+}
