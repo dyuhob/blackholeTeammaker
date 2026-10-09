@@ -79,6 +79,7 @@ void main() {
 
     expect(find.text('2026-09-07 20:30 팀 편성'), findsOneWidget);
     expect(history.values, isEmpty);
+    expect(find.widgetWithText(FilledButton, '저장'), findsOneWidget);
 
     await tester.tap(find.byKey(const Key('save-result-button')));
     await tester.pumpAndSettle();
@@ -124,7 +125,7 @@ void main() {
       tester.element(find.byKey(const Key('save-result-button'))),
     ).colorScheme.primary;
     final galleryButton = tester.widget<FilledButton>(
-      find.widgetWithText(FilledButton, '갤러리에 저장'),
+      find.widgetWithText(FilledButton, '갤러리'),
     );
     expect(
       galleryButton.style?.backgroundColor?.resolve(<WidgetState>{}),
@@ -187,7 +188,7 @@ void main() {
     await tester.enterText(find.byKey(const Key('member-score-input')), '155');
     await tester.tap(find.byKey(const Key('member-gender-input')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('W').last);
+    await tester.tap(find.text('여').last);
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('팀짜기').last);
@@ -251,7 +252,7 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('member-gender-input')),
-        matching: find.text('W'),
+        matching: find.text('여'),
       ),
       findsOneWidget,
     );

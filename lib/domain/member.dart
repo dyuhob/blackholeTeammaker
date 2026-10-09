@@ -1,6 +1,6 @@
 enum MemberGender {
-  male(0, 'M'),
-  female(1, 'W');
+  male(0, '남'),
+  female(1, '여');
 
   const MemberGender(this.storageValue, this.label);
 

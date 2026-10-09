@@ -82,7 +82,7 @@ void main() {
     expect(card.bottom - editor.bottom, closeTo(8, 0.1));
   });
 
-  testWidgets('member gender defaults to M and can be added and edited', (
+  testWidgets('member gender defaults to 남 and can be added and edited', (
     tester,
   ) async {
     await pumpApp(tester);
@@ -90,13 +90,13 @@ void main() {
     expect(
       find.descendant(
         of: find.byKey(const Key('member-gender-input')),
-        matching: find.text('M'),
+        matching: find.text('남'),
       ),
       findsOneWidget,
     );
     await tester.tap(find.byKey(const Key('member-gender-input')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('W').last);
+    await tester.tap(find.text('여').last);
     await tester.enterText(find.byKey(const Key('member-name-input')), '여성');
     await tester.enterText(find.byKey(const Key('member-score-input')), '180');
     await tester.tap(find.widgetWithText(FilledButton, '추가'));
@@ -111,7 +111,7 @@ void main() {
 
     await tester.tap(savedGender);
     await tester.pumpAndSettle();
-    await tester.tap(find.text('M').last);
+    await tester.tap(find.text('남').last);
     await tester.pumpAndSettle();
     expect(
       tester.widget<DropdownButton<MemberGender>>(savedGender).value,

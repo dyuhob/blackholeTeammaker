@@ -185,8 +185,51 @@ void main() {
     expect(allocationMode.height, buildButton.height);
     expect(allocationMode.width, closeTo(buildButton.width, 1));
     expect(femaleHandicap.width, closeTo(buildButton.width, 1));
+    expect(femaleHandicap.left, lessThan(allocationMode.left));
+    expect(allocationMode.left, lessThan(buildButton.left));
     expect(allocationMode.top, greaterThan(teamTitle.bottom));
     expect(buildButton.bottom, lessThanOrEqualTo(unselectedTitle.top));
+
+    final toggle = tester.widget<SegmentedButton<TeamAllocationMode>>(
+      find.byKey(const Key('allocation-mode-toggle')),
+    );
+    final primaryColor = Theme.of(
+      tester.element(find.byKey(const Key('build-teams-button'))),
+    ).colorScheme.primary;
+    expect(
+      toggle.style?.minimumSize?.resolve({WidgetState.selected}),
+      const Size(0, 48),
+    );
+    final toggleShape = toggle.style?.shape?.resolve({WidgetState.selected});
+    expect(toggleShape, isA<RoundedRectangleBorder>());
+    expect(
+      (toggleShape! as RoundedRectangleBorder).borderRadius,
+      BorderRadius.circular(12),
+    );
+    expect(
+      toggle.style?.backgroundColor?.resolve({WidgetState.selected}),
+      primaryColor,
+    );
+    expect(
+      toggle.style?.foregroundColor?.resolve({WidgetState.selected}),
+      Colors.white,
+    );
+    expect(
+      toggle.style?.textStyle?.resolve({WidgetState.selected})?.fontWeight,
+      FontWeight.bold,
+    );
+    expect(
+      tester
+          .widget<Text>(
+            find.descendant(
+              of: find.byKey(const Key('female-handicap-control')),
+              matching: find.text('여성핸디'),
+            ),
+          )
+          .style
+          ?.fontWeight,
+      FontWeight.bold,
+    );
 
     expect(controller.allocationMode, TeamAllocationMode.random);
     await tester.tap(find.text('에버순'));
@@ -202,7 +245,7 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.byKey(const Key('temporary-gender-input')));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('W').last);
+    await tester.tap(find.text('여').last);
     await tester.enterText(
       find.byKey(const Key('temporary-name-input')),
       '여성 게스트',
@@ -242,6 +285,14 @@ void main() {
     expect(inputTheme.fillColor, Colors.white);
     final focusedBorder = inputTheme.focusedBorder! as OutlineInputBorder;
     expect(focusedBorder.borderSide.color, const Color(0xFF42A5F5));
+    final memberNameInput = tester.getRect(
+      find.byKey(const Key('member-name-input')),
+    );
+    final memberScoreInput = tester.getRect(
+      find.byKey(const Key('member-score-input')),
+    );
+    expect(memberScoreInput.width, closeTo(62, 0.1));
+    expect(memberNameInput.width, greaterThan(memberScoreInput.width));
     final memberScore = tester.widget<InputDecorator>(
       find.descendant(
         of: find.byKey(const Key('member-score-1')),
@@ -461,6 +512,13 @@ void main() {
               .style
               ?.color,
           Colors.red,
+        );
+        expect(
+          tester
+              .widget<Text>(find.byKey(Key('participant-handicap-$id')))
+              .style
+              ?.fontWeight,
+          FontWeight.bold,
         );
       }
     }

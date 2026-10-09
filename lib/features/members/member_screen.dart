@@ -144,7 +144,7 @@ class _MemberScreenState extends State<MemberScreen> {
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
-                    width: 92,
+                    width: 62,
                     child: TextField(
                       key: const Key('member-score-input'),
                       controller: _scoreController,

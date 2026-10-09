@@ -267,7 +267,7 @@ class _TeamResultScreenState extends State<TeamResultScreen> {
                     size: 20,
                   ),
                   label: Text(
-                    _hasSavedTitle ? '저장됨' : (_saved ? '변경사항 저장' : '기록 저장'),
+                    _hasSavedTitle ? '저장됨' : (_saved ? '변경사항 저장' : '저장'),
                   ),
                 ),
               ),

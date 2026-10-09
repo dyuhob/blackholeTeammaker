@@ -113,7 +113,7 @@ class _TeamCard extends StatelessWidget {
                           ),
                           style: const TextStyle(
                             color: Colors.red,
-                            fontWeight: FontWeight.w500,
+                            fontWeight: FontWeight.bold,
                           ),
                         ),
                         const SizedBox(width: 8),

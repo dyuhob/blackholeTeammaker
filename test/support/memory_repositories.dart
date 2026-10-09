@@ -58,7 +58,7 @@ class MemoryWorkspaceRepository implements WorkspaceRepository {
 
 class MemoryGalleryExporter implements GalleryExporter {
   MemoryGalleryExporter({
-    this.actionLabel = '갤러리에 저장',
+    this.actionLabel = '갤러리',
     this.busyLabel = '준비 중…',
     this.successMessage = '갤러리에 저장했습니다.',
     this.failureMessage = '갤러리에 저장하지 못했습니다.',
