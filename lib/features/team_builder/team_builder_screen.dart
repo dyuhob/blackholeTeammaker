@@ -154,7 +154,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Expanded(
-                  flex: 5,
+                  flex: 3,
                   child: TextField(
                     key: const Key('team-title-input'),
                     controller: _titleController,
@@ -173,7 +173,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                           widget.controller.teamSizeInput = value,
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                      decoration: _inputDecoration('인원'),
+                      decoration: _inputDecoration('팀별 인원'),
                     ),
                   ),
                 ),
@@ -186,36 +186,31 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                Expanded(
-                  child: InkWell(
-                    key: const Key('female-handicap-control'),
-                    borderRadius: BorderRadius.circular(12),
-                    onTap: () => widget.controller.femaleHandicapEnabled =
-                        !widget.controller.femaleHandicapEnabled,
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Checkbox(
-                          value: widget.controller.femaleHandicapEnabled,
-                          onChanged: (value) =>
-                              widget.controller.femaleHandicapEnabled =
-                                  value ?? false,
-                          visualDensity: VisualDensity.compact,
-                          materialTapTargetSize:
-                              MaterialTapTargetSize.shrinkWrap,
+                InkWell(
+                  key: const Key('female-handicap-control'),
+                  borderRadius: BorderRadius.circular(12),
+                  onTap: () => widget.controller.femaleHandicapEnabled =
+                      !widget.controller.femaleHandicapEnabled,
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Checkbox(
+                        value: widget.controller.femaleHandicapEnabled,
+                        onChanged: (value) =>
+                            widget.controller.femaleHandicapEnabled =
+                                value ?? false,
+                        visualDensity: VisualDensity.compact,
+                        materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                      const Text(
+                        '여성핸디',
+                        maxLines: 1,
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
                         ),
-                        const Flexible(
-                          child: Text(
-                            '여성핸디',
-                            maxLines: 1,
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
+                      ),
+                    ],
                   ),
                 ),
                 const SizedBox(width: 10),
@@ -225,12 +220,7 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
                     showSelectedIcon: false,
                     style: ButtonStyle(
                       tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                      minimumSize: const WidgetStatePropertyAll(
-                        Size(0, _controlHeight),
-                      ),
-                      maximumSize: const WidgetStatePropertyAll(
-                        Size(double.infinity, _controlHeight),
-                      ),
+                      visualDensity: const VisualDensity(vertical: 2),
                       padding: const WidgetStatePropertyAll(
                         EdgeInsets.symmetric(horizontal: 4),
                       ),

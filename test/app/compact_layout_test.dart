@@ -180,11 +180,13 @@ void main() {
     );
     expect(teamTitle.top, teamSize.top);
     expect(teamTitle.height, teamSize.height);
-    expect(teamTitle.width, greaterThan(teamSize.width * 4.8));
+    expect(teamTitle.width, closeTo(teamSize.width * 3, 1));
+    expect(find.text('팀별 인원'), findsOneWidget);
     expect(allocationMode.top, buildButton.top);
     expect(allocationMode.height, buildButton.height);
     expect(allocationMode.width, closeTo(buildButton.width, 1));
-    expect(femaleHandicap.width, closeTo(buildButton.width, 1));
+    expect(femaleHandicap.width, lessThan(buildButton.width));
+    expect(femaleHandicap.left, closeTo(teamTitle.left, 0.1));
     expect(femaleHandicap.left, lessThan(allocationMode.left));
     expect(allocationMode.left, lessThan(buildButton.left));
     expect(allocationMode.top, greaterThan(teamTitle.bottom));
@@ -193,13 +195,29 @@ void main() {
     final toggle = tester.widget<SegmentedButton<TeamAllocationMode>>(
       find.byKey(const Key('allocation-mode-toggle')),
     );
+    final segmentButtons = find.descendant(
+      of: find.byKey(const Key('allocation-mode-toggle')),
+      matching: find.byType(TextButton),
+    );
+    expect(segmentButtons, findsNWidgets(2));
+    for (final button in segmentButtons.evaluate()) {
+      expect(
+        tester
+            .getRect(find.byElementPredicate((element) => element == button))
+            .height,
+        closeTo(allocationMode.height, 0.1),
+      );
+    }
+    final handicapCheckbox = tester.getRect(
+      find.descendant(
+        of: find.byKey(const Key('female-handicap-control')),
+        matching: find.byType(Checkbox),
+      ),
+    );
+    expect(handicapCheckbox.left, closeTo(teamTitle.left, 0.1));
     final primaryColor = Theme.of(
       tester.element(find.byKey(const Key('build-teams-button'))),
     ).colorScheme.primary;
-    expect(
-      toggle.style?.minimumSize?.resolve({WidgetState.selected}),
-      const Size(0, 48),
-    );
     final toggleShape = toggle.style?.shape?.resolve({WidgetState.selected});
     expect(toggleShape, isA<RoundedRectangleBorder>());
     expect(
@@ -291,8 +309,16 @@ void main() {
     final memberScoreInput = tester.getRect(
       find.byKey(const Key('member-score-input')),
     );
-    expect(memberScoreInput.width, closeTo(62, 0.1));
+    expect(memberScoreInput.width, closeTo(72, 0.1));
     expect(memberNameInput.width, greaterThan(memberScoreInput.width));
+    final memberNameField = tester.widget<TextField>(
+      find.byKey(const Key('member-name-input')),
+    );
+    final newMemberScoreField = tester.widget<TextField>(
+      find.byKey(const Key('member-score-input')),
+    );
+    expect(memberNameField.decoration?.labelStyle?.fontSize, 14);
+    expect(newMemberScoreField.decoration?.labelStyle?.fontSize, 14);
     final memberScore = tester.widget<InputDecorator>(
       find.descendant(
         of: find.byKey(const Key('member-score-1')),

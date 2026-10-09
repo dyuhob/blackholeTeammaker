@@ -117,7 +117,8 @@ class _MemberScreenState extends State<MemberScreen> {
                       onChanged: (value) =>
                           widget.controller.pendingName = value,
                       textInputAction: TextInputAction.next,
-                      decoration: _inputDecoration('클럽원 이름'),
+                      decoration: _inputDecoration('클럽원 이름')
+                          .copyWith(labelStyle: const TextStyle(fontSize: 14)),
                     ),
                   ),
                   const SizedBox(width: 10),
@@ -144,7 +145,7 @@ class _MemberScreenState extends State<MemberScreen> {
                   ),
                   const SizedBox(width: 10),
                   SizedBox(
-                    width: 62,
+                    width: 72,
                     child: TextField(
                       key: const Key('member-score-input'),
                       controller: _scoreController,
@@ -153,7 +154,8 @@ class _MemberScreenState extends State<MemberScreen> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       onSubmitted: (_) => _addMember(),
-                      decoration: _inputDecoration('점수'),
+                      decoration: _inputDecoration('점수')
+                          .copyWith(labelStyle: const TextStyle(fontSize: 14)),
                     ),
                   ),
                   const SizedBox(width: 10),
