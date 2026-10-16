@@ -148,6 +148,17 @@ void main() {
     final participantHeader = tester.getRect(
       find.byKey(const Key('participant-section-header')),
     );
+    final participantTitle = find.text('현재 참가자');
+    final excludeAllButton = find.widgetWithText(TextButton, '전체 제외');
+    final excludeAllLabel = find.text('전체 제외');
+    final addAllLabel = find.text('전체 추가');
+    final participantTitleRect = tester.getRect(participantTitle);
+    final excludeAllButtonRect = tester.getRect(excludeAllButton);
+    final excludeAllLabelRect = tester.getRect(excludeAllLabel);
+    final addAllLabelRect = tester.getRect(addAllLabel);
+    expect(excludeAllButtonRect.height, participantHeader.height);
+    expect(excludeAllLabelRect.height, addAllLabelRect.height);
+    expect(excludeAllLabelRect.top, closeTo(participantTitleRect.top, 0.1));
     expect(participantDivider.top - lastUnselected.bottom, closeTo(10, 0.1));
     expect(participantHeader.top - participantDivider.bottom, closeTo(5, 0.1));
     expect(firstParticipant.top - participantHeader.bottom, closeTo(5, 0.1));
@@ -294,6 +305,53 @@ void main() {
     await tester.tap(find.byKey(const Key('add-temporary-button')));
     await tester.pumpAndSettle();
     expect(controller.participants.last.gender, MemberGender.female);
+  });
+
+  testWidgets('participant header grows without clipping scaled text', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(800, 1200);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    final controller = createController();
+    addTearDown(controller.dispose);
+    final history = HistoryController(MemoryHistoryRepository());
+    addTearDown(history.dispose);
+
+    await tester.pumpWidget(
+      MaterialApp(
+        builder: (context, child) => MediaQuery(
+          data: MediaQuery.of(context)
+              .copyWith(textScaler: const TextScaler.linear(2)),
+          child: child!,
+        ),
+        home: Scaffold(
+          body: TeamBuilderScreen(
+            controller: controller,
+            historyController: history,
+            galleryExporter: MemoryGalleryExporter(),
+          ),
+        ),
+      ),
+    );
+
+    final header = tester.getRect(
+      find.byKey(const Key('participant-section-header')),
+    );
+    final title = tester.getRect(find.text('현재 참가자'));
+    final button = tester.getRect(find.widgetWithText(TextButton, '전체 제외'));
+    final label = tester.getRect(find.text('전체 제외'));
+
+    expect(header.height, greaterThan(32));
+    expect(label.top, closeTo(title.top, 0.1));
+    expect(label.top, greaterThanOrEqualTo(button.top));
+    expect(label.bottom, lessThanOrEqualTo(button.bottom));
+    expect(button.top, greaterThanOrEqualTo(header.top));
+    expect(button.bottom, lessThanOrEqualTo(header.bottom));
+    expect(title.bottom, lessThanOrEqualTo(header.bottom));
+    expect(tester.takeException(), isNull);
   });
 
   testWidgets('whole exclusion confirms before clearing members and guests', (

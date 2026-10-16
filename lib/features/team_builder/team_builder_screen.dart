@@ -341,15 +341,27 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
           const SizedBox(height: 10),
           const Divider(key: Key('participant-section-divider'), height: 1),
           const SizedBox(height: 5),
-          SizedBox(
+          ConstrainedBox(
             key: const Key('participant-section-header'),
-            height: 32,
+            constraints: const BoxConstraints(minHeight: 32),
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('현재 참가자', style: Theme.of(context).textTheme.titleMedium),
+                Padding(
+                  padding: const EdgeInsets.only(top: 4),
+                  child: Text(
+                    '현재 참가자',
+                    style: Theme.of(context).textTheme.titleMedium,
+                  ),
+                ),
                 const Spacer(),
                 TextButton(
                   onPressed: _excludeAllParticipants,
+                  style: TextButton.styleFrom(
+                    minimumSize: const Size(64, 32),
+                    padding: const EdgeInsets.fromLTRB(12, 4, 12, 8),
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
                   child: const Text('전체 제외'),
                 ),
               ],
