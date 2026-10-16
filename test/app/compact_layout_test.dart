@@ -102,6 +102,9 @@ void main() {
     final firstUnselected = tester.getRect(
       find.byKey(const Key('unselected-card-3')),
     );
+    final lastUnselected = tester.getRect(
+      find.byKey(const Key('unselected-card-4')),
+    );
     expect(guestAdd.top, firstUnselected.top);
     expect(guestAdd.width, closeTo(firstUnselected.width, 1));
     expect(guestAdd.height, 36);
@@ -136,6 +139,19 @@ void main() {
 
     expect(find.widgetWithText(TextButton, '전체 추가'), findsOneWidget);
     expect(find.widgetWithText(OutlinedButton, '전체 추가'), findsNothing);
+    expect(find.widgetWithText(TextButton, '전체 제외'), findsOneWidget);
+    expect(find.widgetWithText(OutlinedButton, '전체 제외'), findsNothing);
+
+    final participantDivider = tester.getRect(
+      find.byKey(const Key('participant-section-divider')),
+    );
+    final participantHeader = tester.getRect(
+      find.byKey(const Key('participant-section-header')),
+    );
+    expect(participantDivider.top - lastUnselected.bottom, closeTo(10, 0.1));
+    expect(participantHeader.top - participantDivider.bottom, closeTo(5, 0.1));
+    expect(firstParticipant.top - participantHeader.bottom, closeTo(5, 0.1));
+    expect(firstParticipant.top - lastUnselected.bottom, closeTo(53, 0.1));
 
     final removeButton = tester.getRect(
       find.descendant(
@@ -278,6 +294,61 @@ void main() {
     await tester.tap(find.byKey(const Key('add-temporary-button')));
     await tester.pumpAndSettle();
     expect(controller.participants.last.gender, MemberGender.female);
+  });
+
+  testWidgets('whole exclusion confirms before clearing members and guests', (
+    tester,
+  ) async {
+    final controller = createController()..addManualTemporary('게스트', 150);
+    addTearDown(controller.dispose);
+    final history = HistoryController(MemoryHistoryRepository());
+    addTearDown(history.dispose);
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: TeamBuilderScreen(
+            controller: controller,
+            historyController: history,
+            galleryExporter: MemoryGalleryExporter(),
+          ),
+        ),
+      ),
+    );
+
+    final excludeAll = find.widgetWithText(TextButton, '전체 제외');
+    await tester.tap(excludeAll);
+    await tester.pumpAndSettle();
+
+    expect(find.text('전체 제외하시겠습니까?'), findsOneWidget);
+    expect(find.text('게스트는 자동 삭제됩니다.'), findsOneWidget);
+    final confirm = find.widgetWithText(TextButton, '확인');
+    final cancel = find.widgetWithText(TextButton, '취소');
+    expect(tester.getRect(confirm).left, lessThan(tester.getRect(cancel).left));
+
+    await tester.tap(cancel);
+    await tester.pumpAndSettle();
+    expect(controller.participants, hasLength(3));
+    expect(
+      controller.participants.any(
+        (participant) => participant.type == ParticipantType.manualTemporary,
+      ),
+      isTrue,
+    );
+
+    await tester.tap(excludeAll);
+    await tester.pumpAndSettle();
+    await tester.tap(find.widgetWithText(TextButton, '확인'));
+    await tester.pumpAndSettle();
+
+    expect(controller.participants, isEmpty);
+    expect(controller.availableMembers.map((member) => member.id), [
+      '1',
+      '2',
+      '3',
+      '4',
+    ]);
+    expect(find.text('게스트'), findsNothing);
+    expect(find.text('참가자를 한 명 이상 추가해 주세요.'), findsOneWidget);
   });
 
   testWidgets('inputs are white and guest dialog controls match top height', (

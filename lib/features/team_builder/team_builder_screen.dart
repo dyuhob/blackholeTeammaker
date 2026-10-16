@@ -134,6 +134,33 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
     }
   }
 
+  Future<void> _excludeAllParticipants() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('전체 제외'),
+        content: const Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [Text('전체 제외하시겠습니까?'), Text('게스트는 자동 삭제됩니다.')],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, true),
+            child: const Text('확인'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext, false),
+            child: const Text('취소'),
+          ),
+        ],
+      ),
+    );
+    if (!mounted || confirmed != true) return;
+    _invalidScoreParticipantIds.clear();
+    widget.controller.excludeAllParticipants();
+  }
+
   void _showMessage(String message) {
     ScaffoldMessenger.of(context)
         .showSnackBar(SnackBar(content: Text(message)));
@@ -311,17 +338,24 @@ class _TeamBuilderScreenState extends State<TeamBuilderScreen> {
               );
             },
           ),
-          const Divider(height: 21),
+          const SizedBox(height: 10),
+          const Divider(key: Key('participant-section-divider'), height: 1),
+          const SizedBox(height: 5),
           SizedBox(
+            key: const Key('participant-section-header'),
             height: 32,
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                '현재 참가자',
-                style: Theme.of(context).textTheme.titleMedium,
-              ),
+            child: Row(
+              children: [
+                Text('현재 참가자', style: Theme.of(context).textTheme.titleMedium),
+                const Spacer(),
+                TextButton(
+                  onPressed: _excludeAllParticipants,
+                  child: const Text('전체 제외'),
+                ),
+              ],
             ),
           ),
+          const SizedBox(height: 5),
           if (participants.isEmpty)
             const SizedBox(
               height: _compactCardHeight,

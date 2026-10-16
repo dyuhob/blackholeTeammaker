@@ -115,6 +115,12 @@ class TeamBuilderController extends ChangeNotifier {
     notifyListeners();
   }
 
+  void excludeAllParticipants() {
+    if (_participants.isEmpty) return;
+    _participants.clear();
+    notifyListeners();
+  }
+
   void addSavedMember(String memberId) {
     if (_participants.any(
       (participant) => participant.sourceMemberId == memberId,
